@@ -6,11 +6,15 @@ from .models import ModelActorMarsLander, ModelCriticMarsLander, ModelRunningObj
 from .actor import ActorMarsLander
 from .critic import CriticMarsLander
 from .scenario import EpisodicScenarioMarsLander
+from .system import SysMarsLander
 
 
 
 class PipelineMarsLander(PipelineWithDefaults):
     config = ConfigMarsLander
+
+    def initialize_system(self):
+        self.system = SysMarsLander()
 
     def initialize_models(self):
         """
@@ -27,8 +31,9 @@ class PipelineMarsLander(PipelineWithDefaults):
                             )
 
         self.model_running_objective = ModelRunningObjectiveMarsLander(
-                                            fuel_consumption_coeff=self.fuel_consumption_coeff,
-                                            angle_constraint_coeff=self.angle_constraint_coeff
+                                fuel_consumption_coeff=self.fuel_consumption_coeff,
+                                angle_constraint_coeff=self.angle_constraint_coeff
+                            )
 
 
     def initialize_optimizers(self):

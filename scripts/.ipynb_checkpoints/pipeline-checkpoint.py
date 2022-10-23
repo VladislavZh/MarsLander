@@ -31,12 +31,12 @@ class PipelineMarsLander(PipelineWithDefaults):
             TODO: fix
         """
         self.critic_model = ModelCriticMarsLander(
-                                self.dim_output,
+                                self.dim_observation,
                                 ... # model params
                             )
         self.actor_model  = ModelActorMarsLander(
-                                self.dim_output,
-                                self.dim_input,
+                                self.dim_observation,
+                                self.dim_action,
                                 ... # model params
                             )
 

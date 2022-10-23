@@ -154,22 +154,31 @@ class SysMarsLander(System):
         # landscape
         for i in range(self.landscape.shape[0]-1):
             part = self.landscape[i:i+2,:].copy()
+            k_part = (part[1,1] - part[0,1])/(part[1,0] - part[0,0])
+            b_part = part[0,1] - (part[1,1] - part[0,1])/(part[1,0] - part[0,0]) * part[0,0]
             if direction == 'left' and part[0,0] > state[0]:
                 break
             elif direction == 'left' and part[1,0] > state[0]:
                 part[1,0] = state[0]
+                part[1,1] = k_part * state[0] + b_part
             elif direction == 'right' and part[1,0] < state[0]:
                 continue
             elif direction == 'right' and part[0,0] < state[0]:
                 part[0,0] = state[0]
-            k_part = (part[1,1] - part[0,1])/(part[1,0] - part[0,0])
-            b_part = part[0,1] - (part[1,1] - part[0,1])/(part[1,0] - part[0,0]) * part[0,0]
+                part[0,1] = k_part * state[0] + b_part
 
             if k_part == 0:
                 x1 = state[0]
                 y1 = part[0,1]
                 if x1 <= part[1,0] and x1 >= part[0,0]:
                     closest_points.append(self.get_radial(x1 - state[0], y1 - state[1]))
+                else:
+                    left  = self.get_radial(part[0,0] - state[0], part[0,1] - state[1])
+                    right = self.get_radial(part[1,0] - state[0], part[1,1] - state[1])
+                    if left[0] < right[0]:
+                        closest_points.append(left)
+                    else:
+                        closest_points.append(right)
             else:
                 k = -1/k_part
                 b = state[1] - k * state[0]
@@ -187,19 +196,37 @@ class SysMarsLander(System):
                         closest_points.append(right)
         closest_points = np.array(closest_points)
         ids = np.argsort(closest_points[:,0])
-        return closest_points.flatten()#[ids[0],:]
+        return closest_points[ids[0],:]
+
+    def _in_borders(self, state):
+        if state[0] < 0:
+            return False
+        if state[0] > self.width:
+            return False
+        if state[1] > self.height:
+            return False
+        for i in range(self.landscape.shape[0]-1):
+            part = self.landscape[i:i+2,:].copy()
+            if state[0] >= part[0,0] and state[0] <= part[1,0]:
+                dx   = state[0] - part[0,0]
+                dy   = state[1] - part[0,1]
+                dx_l = part[1,0] - part[0,0]
+                dy_l = part[1,1] - part[0,1]
+                if dx_l * dy - dy_l * dx < 0:
+                    return False
+        return True
 
     def _compute_state_dynamics(self, time, state, action, disturb=[]):
 
         g = self.pars[0]
 
         Dstate = np.zeros(5)
-
-        Dstate[0] = state[3]  # dx/dt
-        Dstate[1] = state[4]  # dy/dt
-        Dstate[2] = action[1] # dphi/dt
-        Dstate[3] = - g + action[0] * np.cos(state[2])
-        Dstate[4] = action[0] * np.sin(state[2])
+        if self._in_borders(state):
+            Dstate[0] = state[3]  # dx/dt
+            Dstate[1] = state[4]  # dy/dt
+            Dstate[2] = action[1] # dphi/dt
+            Dstate[3] = - g + action[0] * np.cos(state[2])
+            Dstate[4] = action[0] * np.sin(state[2])
 
         return Dstate
 

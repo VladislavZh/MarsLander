@@ -69,8 +69,8 @@ class PipelineMarsLander(PipelineWithDefaults):
         """
 
         self.critic = CriticMarsLander(
-            dim_input=self.dim_input, # not clear
-            dim_output=self.dim_output, # not clear
+            dim_input=self.dim_input,
+            dim_output=self.dim_output,
             data_buffer_size=self.data_buffer_size, # do we need it?
             running_objective=self.running_objective,
             discount_factor=self.discount_factor,

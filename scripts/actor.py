@@ -15,6 +15,7 @@ class ActorMarsLander(Actor):
         **kwargs
     ) -> None:
         super().__init__(*args, **kwargs)
+        
 
     def update(
         self,

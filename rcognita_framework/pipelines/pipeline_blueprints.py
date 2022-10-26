@@ -272,7 +272,7 @@ class PipelineWithDefaults(AbstractPipeline):
     def execute_pipeline(self, **kwargs):
         self.load_config()
         self.setup_env()
-        #self.__dict__.update(kwargs)
+        self.__dict__.update(kwargs)
         self.initialize_system()
         self.initialize_predictor()
         self.initialize_safe_controller()

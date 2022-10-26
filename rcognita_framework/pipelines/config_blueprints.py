@@ -1,3 +1,4 @@
+from collections import namedtuple
 import numpy as np
 import argparse
 from abc import abstractmethod
@@ -88,7 +89,10 @@ class MetaConf(type):
 
             def new_argument_parser(self):
                 args = clsdict["argument_parser"](self)
-                self.__dict__.update(vars(args))
+                if isinstance(args, dict):
+                    self.__dict__.update(args)
+                else:
+                    self.__dict__.update(vars(args))
 
             setattr(cls, "argument_parser", new_argument_parser)
 

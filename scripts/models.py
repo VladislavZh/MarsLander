@@ -7,6 +7,8 @@ import numpy as np
 class ModelActorMarsLander(ModelNN):
     def __init__(
         self,
+        dim_output, 
+        dim_input,
         *args,
         **kwargs
     ) -> None:
@@ -34,6 +36,7 @@ class ModelActorMarsLander(ModelNN):
 class ModelCriticMarsLander(ModelNN):
     def __init__(
         self,
+        dim_output,
         *args,
         **kwargs
     ) -> None:

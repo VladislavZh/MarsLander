@@ -1,4 +1,11 @@
-from rcognita_framework.pipelines.pipeline_blueprints import PipelineWithDefaults
+import sys
+from pathlib import Path
+
+from rcognita_framework.rcognita import optimizers
+
+sys.path.append(Path("../rcognita_framework").resolve())
+
+from rcognita_framework.pipelines.pipeline_blueprints import PipelineWithDefaults, AbstractPipeline
 from rcognita_framework.rcognita.optimizers import TorchOptimizer
 from configs import ConfigMarsLander
 
@@ -13,13 +20,24 @@ from .system import SysMarsLander
 import matplotlib.animation as animation
 from rcognita.utilities import on_key_press
 import matplotlib.pyplot as plt
+import numpy as np
 
 
-class PipelineMarsLander(PipelineWithDefaults):
+# class PipelineMarsLander(PipelineWithDefaults):
+class PipelineMarsLander(AbstractPipeline):
     config = ConfigMarsLander
 
     def initialize_logger(self):
-        pass
+        self.logger = None
+
+    def initialize_controller(self):
+        self.controller = None
+        
+    def initialize_predictor(self):
+        self.predictor = None
+        
+    def initialize_simulator(self):
+        self.simulator = None
 
 
     def initialize_system(self):
@@ -41,12 +59,12 @@ class PipelineMarsLander(PipelineWithDefaults):
         """
         self.critic_model = ModelCriticMarsLander(
                                 self.dim_output,
-                                ... # model params
+                                # ... # model params
                             )
         self.actor_model  = ModelActorMarsLander(
                                 self.dim_output,
                                 self.dim_input,
-                                ... # model params
+                                # ... # model params
                             )
 
         self.model_running_objective = ModelRunningObjectiveMarsLander(
@@ -89,6 +107,7 @@ class PipelineMarsLander(PipelineWithDefaults):
         )
 
         self.actor = ActorMarsLander(
+            self.prediction_horizon,
             self.dim_input,
             self.dim_output,
             self.control_mode, # what is it?
@@ -122,6 +141,8 @@ class PipelineMarsLander(PipelineWithDefaults):
 
     def initialize_scenario(self):
         self.scenario = EpisodicScenarioMarsLander(
+            self.N_episodes, 
+            self.N_iterations,
             self.system,
             self.simulator,
             self.controller,
@@ -139,13 +160,13 @@ class PipelineMarsLander(PipelineWithDefaults):
         """
         TODO: change to real parameters
         """
-        angle_init = 0
-        self.visualizer = AnimatorMarsLander(
-            initial_coords=self.simulator.state_full_init,
+        # angle_init = 0
+        self.animator = AnimatorMarsLander(
+            initial_coords=[7000, 3000, 0], #self.simulator.state_full_init,
             landscape=self.system.landscape,
             xs=np.array([self.system.landscape[:, 0].max() - i for i in range(10, 100)]), #self.simulator.state[0],
-            ys=np.array([self.system.landscape[:, 1].max() - i for i in range(10, 100)]), #self.simulator.state[1],
-            angles=np.linspace(0, np.pi / 4, 9), #self.simulator.state[2],
+            ys=np.array([self.system.landscape[:, 1].max() - i*10 for i in range(10, 100)]), #self.simulator.state[1],
+            angles=np.linspace(0, 180, 9), #self.simulator.state[2],
         )
 
     def main_loop_visual(self):
@@ -153,38 +174,65 @@ class PipelineMarsLander(PipelineWithDefaults):
             TODO: implement
             STATUS: in progress
         """
+        # frames = np.arange(100)
+        anm = animation.FuncAnimation(
+            self.animator.fig_sim,
+            self.animator.animate,
+            init_func=self.animator.init_anim,
+            blit=False,
+            interval=self.sampling_time / 1e6,
+            repeat=False,
+            # frames=frames,
+        )
         # anm = animation.FuncAnimation(
-        #     self.animator.fig_sim,
-        #     self.animator.animate,
-        #     init_func=self.animator.init_anim,
+        #     self.visualizer.fig_sim,
+        #     self.visualizer.animate,
+        #     init_func=self.visualizer.init_anim,
         #     blit=False,
         #     interval=self.sampling_time / 1e6,
         #     repeat=False,
         # )
-        anm = animation.FuncAnimation(
-            self.visualizer.fig_sim,
-            self.visualizer.animate,
-            init_func=self.visualizer.init_anim,
-            blit=False,
-            interval=self.sampling_time / 1e6,
-            repeat=False,
-        )
 
-        # self.animator.get_anm(anm)
-        self.visualizer.get_anm(anm)
+        self.animator.get_anm(anm)
+        # self.visualizer.get_anm(anm)
 
-        # cId = self.animator.fig_sim.canvas.mpl_connect(
-        #     "key_press_event", lambda event: on_key_press(event, anm)
-        # )
-        cId = self.visualizer.fig_sim.canvas.mpl_connect(
+        cId = self.animator.fig_sim.canvas.mpl_connect(
             "key_press_event", lambda event: on_key_press(event, anm)
         )
+        # cId = self.visualizer.fig_sim.canvas.mpl_connect(
+        #     "key_press_event", lambda event: on_key_press(event, anm)
+        # )
 
         anm.running = True
 
-        # self.animator.fig_sim.tight_layout()
-        self.visualizer.fig_sim.tight_layout()
+        self.animator.fig_sim.tight_layout()
+        # self.visualizer.fig_sim.tight_layout()
 
         plt.show()
+    
+    def execute_pipeline(self, **kwargs):
+        self.load_config()
+        self.setup_env()
+        self.__dict__.update(kwargs)
+        self.initialize_system()
+        self.initialize_predictor()
+        # self.initialize_safe_controller()
+        self.initialize_models()
+        # self.initialize_objectives()
+        self.initialize_optimizers()
+        self.initialize_actor_critic()
+        self.initialize_controller()
+        self.initialize_simulator()
+        self.initialize_logger()
+        self.initialize_scenario()
+        # if not self.no_visual and not self.save_trajectory:
+        self.initialize_visualizer()
+        self.main_loop_visual()
+        # else:
+        #     self.scenario.run()
 
-                
+
+
+if __name__ == "__main__":
+    pipeline = PipelineMarsLander()
+    pipeline.execute_pipeline()

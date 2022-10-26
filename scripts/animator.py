@@ -81,10 +81,20 @@ class AnimatorMarsLander(Animator):
             lw=1.5,
         )
 
-        self.marslander_symbol = TextPath((0, 0), "🙭") # https://unicode-table.com/en/search/?q=rocket
+        self.marslander_symbol_init = TextPath((0, 0), "☺") # "🚀") # "🙭") # https://unicode-table.com/en/search/?q=rocket
+        self.marslander_symbol = TextPath((0, 0), "$\u25b2$") # "🚀") # "🙭") # https://unicode-table.com/en/search/?q=rocket
 
-        t = Affine2D().rotate_deg(self.angle_init) # require matplotlib==3.6.0
-        marslander_marker = MarkerStyle(self.marslander_symbol, transform=t)
+        self.scale = 5.
+
+        t = Affine2D().scale(self.scale).rotate_deg(self.angle_init) # require matplotlib==3.6.0
+        marslander_marker_init = MarkerStyle(self.marslander_symbol_init, transform=t)
+        marslander_marker = MarkerStyle(self.marslander_symbol)
+
+        self.marslander_line_init = self.ax.scatter(
+            self.x_init, 
+            self.y_init,
+            marker=marslander_marker_init
+        )
 
         self.marslander_line = self.ax.scatter(
             self.x_init, 
@@ -93,17 +103,24 @@ class AnimatorMarsLander(Animator):
         )
 
     def update_iteration(self, iter):
-        t = Affine2D().rotate_deg(self.angles[iter])
-        marslander_marker = MarkerStyle(self.marslander_symbol, transform=t)
-
-        marslander_line = self.ax.scatter(
-            self.xs[iter], 
-            self.ys[iter],
-            marker=marslander_marker
+        n_iter = min(iter, len(self.angles)-1)
+        t = Affine2D().scale(self.scale).rotate_deg(self.angles[n_iter])
+        # marslander_marker = MarkerStyle(self.marslander_symbol, transform=t)
+            
+        # if n_iter > 0: 
+        #     # print(f'Scatter 2: {self.marslander_line}')
+        #     self.marslander_line.remove()
+            
+        self.marslander_line.set_offsets(
+            np.c_[self.xs[n_iter], self.ys[n_iter]],
         )
+        self.marslander_line.set_transform(t)
+
+        # print(f'Scatter 1: {type(self.marslander_line)}')
 
     def animate(self, n_iters):
-        n_iters_range = min(n_iters, len(self.xs))
+        n_iters_range = min(n_iters, len(self.xs)-1)
         for k in range(n_iters_range):
             self.update_iteration(k)
+
 

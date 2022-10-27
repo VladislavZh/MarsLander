@@ -46,7 +46,7 @@ class ActorMarsLanderAC(Actor):
         **kwargs,
     ) -> None:
         super().__init__(*args, **kwargs)
-
+    '''
     def update(
         self,
         observation: np.array
@@ -62,11 +62,18 @@ class ActorMarsLanderAC(Actor):
 
         #self.store_gradient(current_gradient)
         #pass
+        '''
+    def update(
+        self,
+        observation: np.array
+    ) -> None:
+        self.losses_iter.append(self.objective(observation))
 
     def reset(
         self
     ) -> None:
         super().reset()
+        self.losses_iter = []
 
     def get_action(self):
         return self.action
@@ -76,33 +83,15 @@ class ActorMarsLanderAC(Actor):
 
     def objective(
         self,
-        data_buffer: Optional[np.array] = None,
-        weights: Optional[dict] = None
+        observation
     ) -> torch.Tensor:
         """
         Objective of the critic, say, a squared temporal difference.
 
         """
-        if data_buffer is None:
-            observation_buffer = self.observation_buffer
-            action_buffer = self.action_buffer
-        else:
-            observation_buffer = data_buffer["observation_buffer"]
-            action_buffer = data_buffer["action_buffer"]
-
         actor_objective = 0
-
-        # TODO: code
-        for i in range(self.data_buffer_size - 1, 0, -1):
-            #x_cur = observation_buffer[i-1, :]
-            x_next = observation_buffer[i, :]
-            #u_cur = action_buffer[i-1, :]
-            #u_next = action_buffer[i, :]
-
-            improved_value = self.running_objective + self.discount_factor*self.critic(x_next)
-            actor_objective += -improved_value
-
-
+        improved_value = self.running_objective + self.discount_factor*self.critic(self.actor(observation))
+        actor_objective += -improved_value
         return actor_objective
 
 '''

@@ -32,7 +32,7 @@ class EpisodicScenarioMarsLanderAC(EpisodicScenario):
         # YOUR CODE BELOW
         #############################################
         self.squared_TD_sums_of_episodes.append(self.critic.objective())
-        self.actor_loss_sums_of_episodes.append(self.actor.objective())
+        #self.actor_loss_sums_of_episodes.append(self.actor.objective())
         #############################################
         # YOUR CODE ABOVE
         #############################################
@@ -48,6 +48,7 @@ class EpisodicScenarioMarsLanderAC(EpisodicScenario):
         mean_sum_of_squared_TD = get_mean(self.squared_TD_sums_of_episodes) #just for visualization purposes
         #mean_sum_of_squared_TD = get_mean(self.squared_TD_sums_of_episodes) #just for visualization purposes
         self.square_TD_means.append(mean_sum_of_squared_TD.detach().numpy()) #just for visualization purposes
+        self.actor_loss_sums_of_episodes = self.actor.losses_iter
         #############################################
         # YOUR CODE BELOW
         #############################################

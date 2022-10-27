@@ -95,7 +95,7 @@ class PipelineMarsLanderAC(AbstractPipeline):
             TODO: fix
         """
 
-        self.critic = CriticMarsLander(
+        self.critic = CriticMarsLanderAC(
             dim_input=self.dim_input,
             dim_output=self.dim_output,
             data_buffer_size=self.data_buffer_size, # do we need it?
@@ -106,8 +106,8 @@ class PipelineMarsLanderAC(AbstractPipeline):
             sampling_time=self.sampling_time,
         )
 
-        self.actor = ActorMarsLander(
-            self.prediction_horizon,
+        self.actor = ActorMarsLanderAC(
+            #self.prediction_horizon,
             self.dim_input,
             self.dim_output,
             self.control_mode, # what is it?
@@ -117,6 +117,7 @@ class PipelineMarsLanderAC(AbstractPipeline):
             critic=self.critic,
             running_objective=self.running_objective,
             model=self.actor_model,
+            action_bounds=[[0, -1], [5,1]]
         )
 
     # def initialize_simulator(self):

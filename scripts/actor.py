@@ -64,11 +64,17 @@ class ActorMarsLanderAC(Actor):
         #pass
         '''
     print('inside actor')
-    def update(
+    '''def update(
         self,
         observation: np.array
     ) -> None:
-        self.losses_iter.append(self.objective(observation))
+        self.action_bounds ={'lb':[0, -1],'ub':[5,1]}
+        action_sample = self.model(observation)
+        print(observation.shape, 'observatio')
+        print('action shape', action_sample.shape)
+        self.action = action_sample # np.array(np.clip(action_sample, self.action_bounds[0], self.action_bounds[1]))
+        self.action_old = self.action
+        self.losses_iter.append(self.objective(observation))'''
 
     def reset(
         self
@@ -93,6 +99,7 @@ class ActorMarsLanderAC(Actor):
         actor_objective = 0
         improved_value = self.running_objective + self.discount_factor*self.critic(self.actor(observation))
         actor_objective += -improved_value
+        self.losses_iter.append(self.objective(observation))
         return actor_objective
 
 '''

@@ -254,7 +254,7 @@ class SysMarsLander(System):
         left = self._closest_point(state, 'left')
         right = self._closest_point(state, 'right')
 
-        observation = np.concatenate([r_psi,rays_points,left,right])
+        observation = np.concatenate([r_psi,np.array([phi]),rays_points,left,right,action]) # dim_out = 26
 
         return observation
 

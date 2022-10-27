@@ -2,23 +2,31 @@ from rcognita_framework.rcognita.models import ModelNN
 
 import torch
 import numpy as np
-
+import torch.nn as nn
 
 class ModelActorMarsLander(ModelNN):
     def __init__(
         self,
-        dim_output, 
-        dim_input,
+        dim_observation,
+        dim_action,
         *args,
+        weights=None,
         **kwargs
     ) -> None:
         super().__init__(*args, **kwargs)
 
         # architecture
+        self.fc1 = nn.Linear(dim_observation, dim_action, bias=False)
+
+        if weights is not None:
+            self.load_state_dict(weights)
+        self.double()
+        self.cache_weights()
 
     def forward(
         self,
-        observation: torch.Tensor
+        observation: torch.Tensor,
+        weights = None
     ) -> torch.Tensor:
         """
             Returns action given observation
@@ -30,23 +38,34 @@ class ModelActorMarsLander(ModelNN):
                 action - torch.Tensor, shape = (*, dim_action)
                          action tensor
         """
-        pass
+        #pass
+        if weights is not None:
+            self.update(weights)
+        x = self.fc1(observation) #self.net(input_tensor)
+        return x
 
 
 class ModelCriticMarsLander(ModelNN):
-    def __init__(
-        self,
-        dim_output,
-        *args,
-        **kwargs
-    ) -> None:
+    def __init__(self,
+                 dim_observation,
+                 *args,
+                 weights = None,
+                 **kwargs):
         super().__init__(*args, **kwargs)
 
         # architecture
+        self.fc1 = nn.Linear(dim_observation, dim_observation, bias=False)
+        #print('inside critic')
+
+        if weights is not None:
+            self.load_state_dict(weights)
+        self.double()
+        self.cache_weights()
 
     def forward(
         self,
-        observation_action: torch.Tensor
+        observation_action: torch.Tensor,
+        weights = None
     ) -> torch.Tensor:
         """
             Returns action given observation
@@ -58,7 +77,15 @@ class ModelCriticMarsLander(ModelNN):
                 value - torch.Tensor, shape = (*,)
                         critic value function
         """
-        pass
+        #pass
+        if weights is not None:
+            self.update(weights)
+
+        output = self.fc1(observation_action) #self.net(input_tensor)
+        x = torch.sum(-output*output)
+
+        return x
+
 
 class ModelRunningObjectiveMarsLander:
     def __init__(

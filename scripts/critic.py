@@ -60,6 +60,7 @@ class CriticMarsLanderAC(Critic):
         **kwargs
     ) -> None:
         super().__init__(*args, **kwargs)
+        #print('inside ACtor critic')
 
     def objective(
         self,

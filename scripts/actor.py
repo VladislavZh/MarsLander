@@ -63,6 +63,7 @@ class ActorMarsLanderAC(Actor):
         #self.store_gradient(current_gradient)
         #pass
         '''
+    print('inside actor')
     def update(
         self,
         observation: np.array

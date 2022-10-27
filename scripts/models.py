@@ -48,14 +48,14 @@ class ModelActorMarsLander(ModelNN):
 class ModelCriticMarsLander(ModelNN):
     def __init__(self,
                  dim_observation,
-                 dim_action,
                  *args,
                  weights = None,
                  **kwargs):
         super().__init__(*args, **kwargs)
 
         # architecture
-        self.fc1 = nn.Linear(dim_observation + dim_action, dim_observation + dim_action, bias=False)
+        self.fc1 = nn.Linear(dim_observation, dim_observation, bias=False)
+        #print('inside critic')
 
         if weights is not None:
             self.load_state_dict(weights)

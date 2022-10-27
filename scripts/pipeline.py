@@ -33,13 +33,12 @@ class PipelineMarsLanderAC(AbstractPipeline):
 
     def initialize_controller(self):
         self.controller = None
-        
+
     def initialize_predictor(self):
         self.predictor = None
-        
+
     def initialize_simulator(self):
         self.simulator = None
-
 
     def initialize_system(self):
         self.system = SysMarsLander(
@@ -60,7 +59,6 @@ class PipelineMarsLanderAC(AbstractPipeline):
         """
         self.critic_model = ModelCriticMarsLander(
                                 self.dim_output,
-                                self.dim_input,
                                 # ... # model params
                             )
         self.actor_model  = ModelActorMarsLander(
@@ -97,7 +95,7 @@ class PipelineMarsLanderAC(AbstractPipeline):
             TODO: fix
         """
 
-        self.critic = CriticMarsLanderAC(
+        self.critic = CriticMarsLander(
             dim_input=self.dim_input,
             dim_output=self.dim_output,
             data_buffer_size=self.data_buffer_size, # do we need it?
@@ -108,7 +106,7 @@ class PipelineMarsLanderAC(AbstractPipeline):
             sampling_time=self.sampling_time,
         )
 
-        self.actor = ActorMarsLanderAC(
+        self.actor = ActorMarsLander(
             self.prediction_horizon,
             self.dim_input,
             self.dim_output,
@@ -143,7 +141,7 @@ class PipelineMarsLanderAC(AbstractPipeline):
 
     def initialize_scenario(self):
         self.scenario = EpisodicScenarioMarsLander(
-            self.N_episodes, 
+            self.N_episodes,
             self.N_iterations,
             self.system,
             self.simulator,
@@ -167,8 +165,8 @@ class PipelineMarsLanderAC(AbstractPipeline):
             initial_coords=[7000, 3000, 0], #self.simulator.state_full_init,
             landscape=self.system.landscape,
             xs=np.array([self.system.landscape[:, 0].max() - i for i in range(10, 100)]), #self.simulator.state[0],
-            ys=np.array([self.system.landscape[:, 1].max() - i*10 for i in range(10, 100)]), #self.simulator.state[1],
-            angles=np.linspace(0, 180, 9), #self.simulator.state[2],
+            ys=np.array([self.system.landscape[:, 1].max() - i*40 for i in range(10, 100)]), #self.simulator.state[1],
+            angles=np.linspace(0, 45, 9), #self.simulator.state[2],
         )
 
     def main_loop_visual(self):
@@ -176,7 +174,6 @@ class PipelineMarsLanderAC(AbstractPipeline):
             TODO: implement
             STATUS: in progress
         """
-        '''
         # frames = np.arange(100)
         anm = animation.FuncAnimation(
             self.animator.fig_sim,
@@ -212,7 +209,7 @@ class PipelineMarsLanderAC(AbstractPipeline):
         # self.visualizer.fig_sim.tight_layout()
 
         plt.show()
-    '''
+
     def execute_pipeline(self, **kwargs):
         self.load_config()
         self.setup_env()
@@ -229,10 +226,12 @@ class PipelineMarsLanderAC(AbstractPipeline):
         self.initialize_logger()
         self.initialize_scenario()
         # if not self.no_visual and not self.save_trajectory:
-        #self.initialize_visualizer()  #UNCOMMENT TO VISUZLIZE
+        self.initialize_visualizer()
         self.main_loop_visual()
         # else:
         #     self.scenario.run()
+
+
 
 class PipelineMarsLanderDQN(AbstractPipeline):
     config = ConfigMarsLander
@@ -264,7 +263,7 @@ class PipelineMarsLanderDQN(AbstractPipeline):
             model=self.critic_model,
             sampling_time=self.sampling_time,
         )
-        self.actor =ActorProbabilisticEpisodicACMars(
+        self.actor = ActorProbabilisticEpisodicACMars(
             self.prediction_horizon,
             self.dim_input,
             self.dim_output,

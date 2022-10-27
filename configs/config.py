@@ -2,7 +2,6 @@ from rcognita_framework.pipelines.config_blueprints import AbstractConfig, Rcogn
 from collections import namedtuple
 import numpy as np
         
-
 class ConfigMarsLander(AbstractConfig):
     def __init__(self):
         self.config_name = "mars-lander"

@@ -6,6 +6,7 @@ from rcognita_framework.rcognita import optimizers
 sys.path.append(Path("../rcognita_framework").resolve())
 
 from rcognita_framework.pipelines.pipeline_blueprints import PipelineWithDefaults, AbstractPipeline
+
 from rcognita_framework.rcognita.optimizers import TorchOptimizer
 from configs import ConfigMarsLander
 
@@ -38,7 +39,6 @@ class PipelineMarsLander(AbstractPipeline):
         
     def initialize_simulator(self):
         self.simulator = None
-
 
     def initialize_system(self):
         self.system = SysMarsLander(
@@ -236,3 +236,4 @@ class PipelineMarsLander(AbstractPipeline):
 if __name__ == "__main__":
     pipeline = PipelineMarsLander()
     pipeline.execute_pipeline()
+

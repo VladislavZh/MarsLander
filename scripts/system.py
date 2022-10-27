@@ -225,8 +225,8 @@ class SysMarsLander(System):
             Dstate[0] = state[3]  # dx/dt
             Dstate[1] = state[4]  # dy/dt
             Dstate[2] = action[1] # dphi/dt
-            Dstate[3] = - g + action[0] * np.cos(state[2])
-            Dstate[4] = action[0] * np.sin(state[2])
+            Dstate[3] =  action[0] * np.sin(state[2]) # acceleration x
+            Dstate[4] = - g + action[0] * np.cos(state[2]) # acceleration y
 
         return Dstate
 

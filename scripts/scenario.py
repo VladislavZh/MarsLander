@@ -7,5 +7,5 @@ class EpisodicScenarioMarsLander(EpisodicScenario):
         *args,
         **kwargs
     ) -> None:
-        super().__init(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         # Question: how do we update actor correctly? Mb we need online scenario?

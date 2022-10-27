@@ -89,6 +89,7 @@ class MetaConf(type):
 
             def new_argument_parser(self):
                 args = clsdict["argument_parser"](self)
+
                 if isinstance(args, dict):
                     self.__dict__.update(args)
                 else:

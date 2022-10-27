@@ -7,6 +7,7 @@ sys.path.append(Path("../rcognita_framework").resolve())
 
 from rcognita_framework.pipelines.pipeline_blueprints import PipelineWithDefaults, AbstractPipeline
 from rcognita_framework.rcognita.models import ModelGaussianConditional
+
 from rcognita_framework.rcognita.optimizers import TorchOptimizer
 from configs import ConfigMarsLander
 
@@ -309,3 +310,4 @@ class PipelineMarsLanderDQN(AbstractPipeline):
 if __name__ == "__main__":
     pipeline = PipelineMarsLanderDQN()
     pipeline.execute_pipeline()
+    

@@ -3,12 +3,12 @@
 """
 This module contains one single class that simulates controller-system (agent-environment) loops.
 The system can be of three types:
-    
+
 - discrete-time deterministic
 - continuous-time deterministic or stochastic
 - discrete-time stochastic (to model Markov decision processes)
 
-Remarks: 
+Remarks:
 
 - All vectors are treated as of type [n,]
 - All buffers are treated as of type [L, n] where each row is a vector
@@ -130,6 +130,7 @@ class Simulator:
         self.compute_closed_loop_rhs = compute_closed_loop_rhs
         self.sys_out = sys_out
         self.sampling_time = sampling_time
+        print(state_init)
 
         # Build full state of the closed-loop
         if is_dynamic_controller:
@@ -245,4 +246,3 @@ class Simulator:
         else:  #### to extend further functionality
             self.time = self.time_start
             self.observation = self.state_full_init
-

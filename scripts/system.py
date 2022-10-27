@@ -70,6 +70,8 @@ class SysMarsLander(System):
         ids = np.argsort(landscape[:,0])
         landscape = landscape[ids,:]
 
+        self.__state_init = None
+
         return landscape, platform
 
     def _compute_ray_intersection(
@@ -216,6 +218,16 @@ class SysMarsLander(System):
                     return False
         return True
 
+    @property
+    def state_init(self):
+        if self.__state_init == None:
+            while True:
+                x, y = np.random.random() * 7000, np.random.random() * 3000
+                if self._in_borders(np.array([x,y])):
+                    self.__state_init = np.array([x,y,0,0,0])
+                    break
+        return self.__state_init
+
     def _compute_state_dynamics(self, time, state, action, disturb=[]):
 
         g = self.pars[0]
@@ -231,7 +243,6 @@ class SysMarsLander(System):
         return Dstate
 
     def out(self, state, time=None, action=None):
-
         # platform angular coordinate distance
         platform_midpoint_x = (self.platform[0] + self.platform[2])/2
         platform_midpoint_y = self.platform[1]
@@ -254,7 +265,7 @@ class SysMarsLander(System):
         left = self._closest_point(state, 'left')
         right = self._closest_point(state, 'right')
 
-        observation = np.concatenate([r_psi,np.array([phi]),rays_points,left,right,action]) # dim_out = 26
+        observation = np.concatenate([r_psi,np.array([phi]),rays_points,left,right,state[3:]]) # dim_out = 26
 
         return observation
 

@@ -1,7 +1,7 @@
 from rcognita_framework.pipelines.config_blueprints import AbstractConfig, RcognitaArgParser
 from collections import namedtuple
 import numpy as np
-        
+
 class ConfigMarsLander(AbstractConfig):
     def __init__(self):
         self.config_name = "mars-lander"
@@ -58,10 +58,10 @@ class ConfigMarsLander(AbstractConfig):
         #     default=9.8,
         #     help="g",
         # )
-        
+
         # return parser.parse_args()
-        return dict(sys_type='diff_eqn', 
-                    dim_state=3,
+        return dict(sys_type='diff_eqn',
+                    dim_state=5,
                     dim_input=2,
                     dim_output=26,
                     dim_disturb=0,
@@ -79,20 +79,24 @@ class ConfigMarsLander(AbstractConfig):
                     critic_iterations=10,
                     data_buffer_size=4,
                     discount_factor=0.99,
-                    sampling_time=5,
+                    sampling_time=1,
                     running_objective=[],
                     control_mode="Actor-Critic",
                     action_bounds={'lb':[0, -1],'ub':[5,1]},
                     action_init=[],
                     predictor=[],
                     datafiles=[""],
-                    time_final=-1,
+                    time_start=0,
+                    time_final=200,
                     no_print=False,
                     is_log=False,
-                    N_episodes=1, 
+                    N_episodes=1,
                     N_iterations=10,
                     no_visual=False,
                     save_trajectory=False,
+                    critic_period=1,
+                    atol=1e-5,
+                    rtol=1e-3
 
                     # action_min=0,
                     # action_max=1e10,
@@ -100,7 +104,7 @@ class ConfigMarsLander(AbstractConfig):
 
 
         #         action_bounds=[],
-        
+
         # predictor=[],
         # optimizer=None,
         # critic=[],

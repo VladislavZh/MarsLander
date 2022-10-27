@@ -7,6 +7,7 @@ sys.path.append(Path("../rcognita_framework").resolve())
 
 from rcognita_framework.pipelines.pipeline_blueprints import PipelineWithDefaults, AbstractPipeline
 from rcognita_framework.rcognita.models import ModelGaussianConditional
+from rcognita_framework.rcognita.simulator import Simulator
 
 from rcognita_framework.rcognita.optimizers import TorchOptimizer
 from configs import ConfigMarsLander
@@ -26,20 +27,13 @@ import numpy as np
 
 
 # class PipelineMarsLander(PipelineWithDefaults):
-class PipelineMarsLanderAC(AbstractPipeline):
+class PipelineMarsLanderAC(PipelineWithDefaults):
     config = ConfigMarsLander
-
     def initialize_logger(self):
         self.logger = None
 
-    def initialize_controller(self):
-        self.controller = None
-
     def initialize_predictor(self):
         self.predictor = None
-
-    def initialize_simulator(self):
-        self.simulator = None
 
     def initialize_system(self):
         self.system = SysMarsLander(
@@ -121,24 +115,24 @@ class PipelineMarsLanderAC(AbstractPipeline):
             action_bounds=[[0, -1], [5,1]]
         )
 
-    # def initialize_simulator(self):
-    #     self.simulator = SimulatorMarsLander(
-    #         sys_type="diff_eqn",
-    #         compute_closed_loop_rhs=self.system.compute_closed_loop_rhs,
-    #         sys_out=self.system.out,
-    #         state_init=self.state_init,
-    #         disturb_init=[],
-    #         action_init=self.action_init,
-    #         time_start=self.time_start,
-    #         time_final=self.time_final,
-    #         sampling_time=self.sampling_time,
-    #         max_step=self.sampling_time / 10,
-    #         first_step=1e-6,
-    #         atol=self.atol,
-    #         rtol=self.rtol,
-    #         is_disturb=self.is_disturb,
-    #         is_dynamic_controller=self.is_dynamic_controller,
-    #     )
+    def initialize_simulator(self):
+        self.simulator = Simulator(
+        sys_type="diff_eqn",
+        compute_closed_loop_rhs=self.system.compute_closed_loop_rhs,
+        sys_out=self.system.out,
+        state_init=self.system.state_init,
+        disturb_init=[],
+        action_init=self.action_init,
+        time_start=self.time_start,
+        time_final=self.time_final,
+        sampling_time=self.sampling_time,
+        max_step=self.sampling_time / 10,
+        first_step=1e-6,
+        atol=self.atol,
+        rtol=self.rtol,
+        is_disturb=self.is_disturb,
+        is_dynamic_controller=self.is_dynamic_controller,
+    )
 
 
     def initialize_scenario(self):
@@ -310,4 +304,3 @@ class PipelineMarsLanderDQN(AbstractPipeline):
 if __name__ == "__main__":
     pipeline = PipelineMarsLanderDQN()
     pipeline.execute_pipeline()
-    

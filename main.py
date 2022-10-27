@@ -1,4 +1,5 @@
-from scripts import PipelineMarsLander
+from scripts import PipelineMarsLanderDQN, PipelineMarsLanderAC
 
-pipeline = PipelineMarsLander()
+pipeline = PipelineMarsLanderAC()
+#pipeline = PipelineMarsLanderDQN()
 pipeline.execute_pipeline()

@@ -6,15 +6,16 @@ from rcognita_framework.rcognita import optimizers
 sys.path.append(Path("../rcognita_framework").resolve())
 
 from rcognita_framework.pipelines.pipeline_blueprints import PipelineWithDefaults, AbstractPipeline
+from rcognita_framework.rcognita.models import ModelGaussianConditional
 
 from rcognita_framework.rcognita.optimizers import TorchOptimizer
 from configs import ConfigMarsLander
 
 from .models import ModelActorMarsLander, ModelCriticMarsLander, ModelRunningObjectiveMarsLander
-from .actor import ActorMarsLander
+from .actor import ActorMarsLander, ActorMarsLanderAC, ActorProbabilisticEpisodicACMars
 from .animator import AnimatorMarsLander
-from .critic import CriticMarsLander
-from .scenario import EpisodicScenarioMarsLander
+from .critic import CriticMarsLander, CriticMarsLanderAC
+from .scenario import EpisodicScenarioMarsLander, EpisodicScenarioDQN
 # from .simulator import SimulatorMarsLander
 from .system import SysMarsLander
 
@@ -25,7 +26,7 @@ import numpy as np
 
 
 # class PipelineMarsLander(PipelineWithDefaults):
-class PipelineMarsLander(AbstractPipeline):
+class PipelineMarsLanderAC(AbstractPipeline):
     config = ConfigMarsLander
 
     def initialize_logger(self):
@@ -33,10 +34,10 @@ class PipelineMarsLander(AbstractPipeline):
 
     def initialize_controller(self):
         self.controller = None
-        
+
     def initialize_predictor(self):
         self.predictor = None
-        
+
     def initialize_simulator(self):
         self.simulator = None
 
@@ -95,7 +96,7 @@ class PipelineMarsLander(AbstractPipeline):
             TODO: fix
         """
 
-        self.critic = CriticMarsLander(
+        self.critic = CriticMarsLanderAC(
             dim_input=self.dim_input,
             dim_output=self.dim_output,
             data_buffer_size=self.data_buffer_size, # do we need it?
@@ -106,8 +107,8 @@ class PipelineMarsLander(AbstractPipeline):
             sampling_time=self.sampling_time,
         )
 
-        self.actor = ActorMarsLander(
-            self.prediction_horizon,
+        self.actor = ActorMarsLanderAC(
+            #self.prediction_horizon,
             self.dim_input,
             self.dim_output,
             self.control_mode, # what is it?
@@ -117,6 +118,7 @@ class PipelineMarsLander(AbstractPipeline):
             critic=self.critic,
             running_objective=self.running_objective,
             model=self.actor_model,
+            action_bounds=[[0, -1], [5,1]]
         )
 
     # def initialize_simulator(self):
@@ -141,7 +143,7 @@ class PipelineMarsLander(AbstractPipeline):
 
     def initialize_scenario(self):
         self.scenario = EpisodicScenarioMarsLander(
-            self.N_episodes, 
+            self.N_episodes,
             self.N_iterations,
             self.system,
             self.simulator,
@@ -209,7 +211,7 @@ class PipelineMarsLander(AbstractPipeline):
         # self.visualizer.fig_sim.tight_layout()
 
         plt.show()
-    
+
     def execute_pipeline(self, **kwargs):
         self.load_config()
         self.setup_env()
@@ -233,7 +235,79 @@ class PipelineMarsLander(AbstractPipeline):
 
 
 
-if __name__ == "__main__":
-    pipeline = PipelineMarsLander()
-    pipeline.execute_pipeline()
+class PipelineMarsLanderDQN(AbstractPipeline):
+    config = ConfigMarsLander
 
+    def initialize_models(self):
+        self.actor_model =ModelGaussianConditional(
+            expectation_function=self.safe_controller,
+            arg_condition=self.observation_init,
+            weights=self.initial_weights,
+        )
+        self.critic_model = ModelCriticMarsLander(
+                                self.dim_output,
+                                self.dim_input,
+                                # ... # model params
+                            )
+        self.model_running_objective = ModelRunningObjectiveMarsLander(
+                                fuel_consumption_coeff=self.fuel_consumption_coeff,
+                                angle_constraint_coeff=self.angle_constraint_coeff
+                            )
+
+    def initialize_actor_critic(self):
+        self.critic = CriticMarsLanderAC(
+            dim_input=self.dim_input,
+            dim_output=self.dim_output,
+            data_buffer_size=self.data_buffer_size, # do we need it?
+            running_objective=self.running_objective,
+            discount_factor=self.discount_factor,
+            optimizer=self.critic_optimizer,
+            model=self.critic_model,
+            sampling_time=self.sampling_time,
+        )
+        self.actor = ActorProbabilisticEpisodicACMars(
+            self.prediction_horizon,
+            self.dim_input,
+            self.dim_output,
+            self.control_mode,
+            self.action_bounds,
+            action_init=self.action_init,
+            predictor=self.predictor,
+            optimizer=self.actor_optimizer,
+            critic=self.critic,
+            running_objective=self.running_objective,
+            model=self.actor_model,
+        )
+
+    def initialize_scenario(self):
+        self.scenario = EpisodicScenarioDQN(
+            system=self.system,
+            simulator=self.simulator,
+            controller=self.controller,
+            actor=self.actor,
+            critic=self.critic,
+            logger=self.logger,
+            datafiles=self.datafiles,
+            time_final=self.time_final,
+            running_objective=self.running_objective,
+            no_print=self.no_print,
+            is_log=self.is_log,
+            is_playback=self.is_playback,
+            N_episodes=self.N_episodes,
+            N_iterations=self.N_iterations,
+            state_init=self.state_init,
+            action_init=self.action_init,
+            learning_rate=self.learning_rate
+        )
+
+    def execute_pipeline(self, **kwargs):
+        """
+        Full execution routine
+        """
+        np.random.seed(42)
+        super().execute_pipeline(**kwargs)
+
+if __name__ == "__main__":
+    pipeline = PipelineMarsLanderDQN()
+    pipeline.execute_pipeline()
+    

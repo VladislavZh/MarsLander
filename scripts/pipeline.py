@@ -54,6 +54,7 @@ class PipelineMarsLanderAC(PipelineWithDefaults):
         """
         self.critic_model = ModelCriticMarsLander(
                                 self.dim_output,
+                                self.dim_input,
                                 # ... # model params
                             )
         self.actor_model  = ModelActorMarsLander(
@@ -214,18 +215,18 @@ class PipelineMarsLanderAC(PipelineWithDefaults):
         self.initialize_predictor()
         # self.initialize_safe_controller()
         self.initialize_models()
-        # self.initialize_objectives()
+        self.initialize_objectives()
         self.initialize_optimizers()
         self.initialize_actor_critic()
         self.initialize_controller()
         self.initialize_simulator()
         self.initialize_logger()
         self.initialize_scenario()
-        # if not self.no_visual and not self.save_trajectory:
-        self.initialize_visualizer()
-        self.main_loop_visual()
-        # else:
-        #     self.scenario.run()
+        if not self.no_visual and not self.save_trajectory:
+            self.initialize_visualizer()
+            self.main_loop_visual()
+        else:
+            self.scenario.run()
 
 
 

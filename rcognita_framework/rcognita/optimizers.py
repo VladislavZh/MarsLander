@@ -202,7 +202,7 @@ class TorchOptimizer(BaseOptimizer):
     @BaseOptimizer.verbose
     def optimize(self, objective, model, model_input):
         optimizer = self.opt_method(
-            model.parameters(), **self.opt_options, weight_decay=0
+            model.parameters(), **self.opt_options#, weight_decay=0
         )
         # optimizer.zero_grad()
 

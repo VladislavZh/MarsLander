@@ -105,6 +105,7 @@ class EpisodicScenarioDQN(EpisodicScenario):
         """
         mean_sum_of_squared_TD = get_mean(self.squared_TD_sums_of_episodes) #just for visualization purposes
         self.square_TD_means.append(mean_sum_of_squared_TD.detach().numpy()) #just for visualization purposes
+        print(self.square_TD_means[-1])
         #############################################
         # YOUR CODE BELOW
         #############################################

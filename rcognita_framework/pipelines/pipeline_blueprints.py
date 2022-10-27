@@ -288,4 +288,5 @@ class PipelineWithDefaults(AbstractPipeline):
             self.initialize_visualizer()
             self.main_loop_visual()
         else:
+            print(1)
             self.scenario.run()

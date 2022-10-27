@@ -94,7 +94,6 @@ class MetaConf(type):
                     self.__dict__.update(args)
                 else:
                     self.__dict__.update(vars(args))
-                self.__dict__.update(vars(args))
 
             setattr(cls, "argument_parser", new_argument_parser)
 

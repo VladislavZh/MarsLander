@@ -17,6 +17,8 @@ class SysMarsLander(System):
         self.name   = "mars-lander"
         self.width  = 7000
         self.height = 3000
+        self.random_landscape = False
+        self.random_initital_point = True
 
         self.landscape, self.platform = self._generate_landscape(
             self.width,
@@ -218,14 +220,17 @@ class SysMarsLander(System):
                     return False
         return True
 
+    def _generate_state_init(self):
+        while True:
+            x, y = np.random.random() * 7000, np.random.random() * 3000
+            if self._in_borders(np.array([x,y])):
+                self.__state_init = np.array([x,y,0,0,0])
+                break
+
     @property
     def state_init(self):
         if self.__state_init == None:
-            while True:
-                x, y = np.random.random() * 7000, np.random.random() * 3000
-                if self._in_borders(np.array([x,y])):
-                    self.__state_init = np.array([x,y,0,0,0])
-                    break
+            self._generate_state_init()
         return self.__state_init
 
     def _compute_state_dynamics(self, time, state, action, disturb=[]):
@@ -270,7 +275,10 @@ class SysMarsLander(System):
         return observation
 
     def reset(self):
-        self.landscape, self.platform = self._generate_landscape(
-            self.width,
-            self.height
-        )
+        if self.random_landscape:
+            self.landscape, self.platform = self._generate_landscape(
+                self.width,
+                self.height
+            )
+        if self.random_initital_point:
+            self._generate_state_init()

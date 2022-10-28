@@ -29,6 +29,7 @@ class EpisodicScenarioMarsLander(EpisodicScenario):
         self.sim_status = 0
 
     def reset_episode(self):
+        self.episode_counter += 1
         self.squared_TD_sums_of_episodes.append(self.critic.objective())
         self.reload_pipeline()
 

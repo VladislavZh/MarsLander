@@ -276,8 +276,7 @@ class EpisodicScenarioBase(OnlineScenario):
 
         if is_episode_ended:
             self.reset_episode()
-
-            is_iteration_ended = (self.episode_counter + 1) >= self.N_episodes # doesn't work without +1
+            is_iteration_ended = self.episode_counter >= self.N_episodes # doesn't work without +1
 
             if is_iteration_ended:
                 self.iteration_update()

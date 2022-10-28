@@ -61,7 +61,12 @@ class CriticMarsLander(Critic):
 
             critic_objective += 1/2*TD**2
 
-        if not self.in_bound(observation_buffer[-1,-5:-3]):
+        use_point = False
+        for i in range(self.data_buffer_size - 1, -1, -1):
+            if not self.in_bound(observation_buffer[i,-5:-3]):
+                use_point = True
+
+        if not use_point:
             critic_objective *= 0
         return critic_objective
 

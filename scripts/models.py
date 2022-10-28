@@ -55,8 +55,8 @@ class ModelActorMarsLander(ModelNN):
         #pass
         if weights is not None:
             self.update(weights)
-        x = self.net(observation)
-        return x
+        output = self.net(observation)
+        return output
 
 
 class ModelCriticMarsLander(ModelNN):
@@ -111,7 +111,7 @@ class ModelCriticMarsLander(ModelNN):
 
         output = self.net(observation_action)
 
-        return x
+        return output
 
 
 class ModelRunningObjectiveMarsLander:

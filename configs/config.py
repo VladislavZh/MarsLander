@@ -14,15 +14,6 @@ class ConfigMarsLander(AbstractConfig):
 
         parser = RcognitaArgParser(description=description)
 
-        self.add_argument(
-            "--t1",
-            type=float,
-            metavar="time_final",
-            dest="time_final",
-            default=100.0,
-            help="Final time of episode.",
-        )
-
         parser.add_argument(
             "--is_playback", action="store_true", help="Flag to playback.",
         )
@@ -36,25 +27,13 @@ class ConfigMarsLander(AbstractConfig):
             help="Final time of critic episode.",
         )
         parser.add_argument(
-            "--N_episodes_critic",
-            type=int,
-            default=1,
-            help="Number of episodes in one critic criteration",
-        )
-        parser.add_argument(
-            "--N_iterations_critic",
-            type=int,
-            default=10,
-            help="Number of iterations in episodical critic scenario",
-        )
-        parser.add_argument(
-            "--N_episodes_actor",
+            "--N_episodes",
             type=int,
             default=4,
             help="Number of episodes in one actor iteration",
         )
         parser.add_argument(
-            "--N_iterations_actor",
+            "--N_iterations",
             type=int,
             default=10,
             help="Number of iterations in episodical actor scenario",
@@ -138,7 +117,7 @@ class ConfigMarsLander(AbstractConfig):
         self.trajectory = []
         self.dim_state = 5
         self.dim_input = 2
-        self.dim_output = 25
+        self.dim_output = 28
         self.dim_disturb = 0
 
         self.pred_step_size = self.sampling_time * self.pred_step_size_multiplier
@@ -157,7 +136,7 @@ class ConfigMarsLander(AbstractConfig):
         self.rtol = 1e-3
 
         # Control constraints
-        self.action_bounds = {'lb':[0, -1],'ub':[5,1]}
+        self.action_bounds = np.array([[0, 5],[-1,1]])
         self.prediction_horizon = 1
 
         # System parameters

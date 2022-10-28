@@ -87,7 +87,6 @@ class Simulator:
         is_disturb=0,
         is_dynamic_controller=0,
     ):
-
         """
         Parameters
         ----------
@@ -125,12 +124,10 @@ class Simulator:
         max_step, first_step, atol, rtol : : numbers
             Parameters for an ODE solver (used if ``sys_type`` is ``diff_eqn``).
         """
-
         self.sys_type = sys_type
         self.compute_closed_loop_rhs = compute_closed_loop_rhs
         self.sys_out = sys_out
         self.sampling_time = sampling_time
-        print(state_init)
 
         # Build full state of the closed-loop
         if is_dynamic_controller:

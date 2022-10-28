@@ -43,6 +43,8 @@ from svgpath2mpl import parse_path
 
 from collections import namedtuple
 
+import torch
+
 
 def getImage(path):
     return OffsetImage(plt.imread(path, format="png"), zoom=0.1)
@@ -51,19 +53,16 @@ def getImage(path):
 class AnimatorMarsLander(Animator):
     def __init__(
         self,
-        initial_coords: Tuple[float, float, float],
-        landscape: np.array,
+        system: Any,
         scenario: Any,
-        # xs: np.array,
-        # ys: np.array,
-        # angles: np.array,
     ):
-
-        x_init, y_init, self.angle_init = initial_coords
+        self.system = system
+        x_init, y_init, self.angle_init = self.system.state_init.detach().cpu().numpy().tolist()[:3]
         self.xy_init = np.c_[x_init, y_init]
-        self.landscape_x, self.landscape_y = landscape[:, 0], landscape[:, 1]
+        self.landscape_x, self.landscape_y = self.system.landscape[:, 0], self.system.landscape[:, 1]
+        self.platform = self.system.platform
 
-        # self.xs, self.ys, self.angles = xs, ys, angles
+        self.scenario = scenario
 
         self.colormap = plt.get_cmap("RdYlGn_r")
 
@@ -81,6 +80,13 @@ class AnimatorMarsLander(Animator):
             self.landscape_x,
             self.landscape_y,
             lw=1.5,
+        )
+
+        (self.platform_line,) = self.ax.plot(
+            [self.platform[0], self.platform[2]],
+            [self.platform[1], self.platform[3]],
+            lw=1.5,
+            color='orange'
         )
 
         marslander_str = """M84.069,344.59c7.188,8.523,53.008,44.805,209.627,44.805c156.62,0,201.495-43.977,207.928-54.019
@@ -122,12 +128,12 @@ class AnimatorMarsLander(Animator):
         self.scale = 5.0
 
         t = (
-            Affine2D().scale(self.scale).rotate_deg(180 + self.angle_init)
+            Affine2D().scale(self.scale).rotate_deg(180 + self.angle_init * 180 / np.pi)
         )  # require matplotlib==3.6.0
         self.transform_init = t
         marslander_marker_init = MarkerStyle(self.marslander_symbol_init, transform=t)
         marslander_marker = MarkerStyle(
-            self.marslander_symbol, transform=t, color="magenta"
+            self.marslander_symbol, transform=t 
         )
 
         self.marslander_line_init = self.ax.scatter(
@@ -141,16 +147,17 @@ class AnimatorMarsLander(Animator):
         self.episodic_scatter_handles = []
         for _ in range(self.scenario.N_episodes):
             new_handle = self.ax.scatter(
-                self.x_init, self.y_init, marker=marslander_marker
+                *self.xy_init[0], marker=marslander_marker
             )
             self.episodic_scatter_handles.append(new_handle)
 
     def update_step(self):
-        breakpoint()
-        x, y, angle = self.scenario.observation
+        # breakpoint()
+        # print('self.scenario.observation\n', self.scenario.observation)
+        x, y, angle = self.scenario.observation[-5:-2]
 
         t = (
-            Affine2D().scale(self.scale).rotate_deg(180 + angle)
+            Affine2D().rotate_deg(angle * 180 / np.pi)
         )  # require matplotlib==3.6.0
         self.marslander_line.set_offsets(
             np.c_[x, y],
@@ -160,14 +167,14 @@ class AnimatorMarsLander(Animator):
     def update_episode(self):
         offsets = self.marslander_line.get_offsets()
         t = self.marslander_line.get_offset_transform()
-        handle = self.episodic_line_handles[self.scenario.episode_counter - 1]
+        handle = self.episodic_scatter_handles[self.scenario.episode_counter - 1]
         handle.set_offsets(offsets)
         handle.set_transform(t)
         self.marslander_line.set_offsets(self.xy_init)
         self.marslander_line.set_transform(self.transform_init)
 
     def update_iteration(self):
-        for handle in self.episodic_line_handles:
+        for handle in self.episodic_scatter_handles:
             handle.set_offsets(self.xy_init)
             handle.set_transform(self.transform_init)
 
@@ -179,6 +186,10 @@ class AnimatorMarsLander(Animator):
         self.update_step()
         if sim_status == "episode_ended":
             self.update_episode()
+            x_init, y_init, self.angle_init = self.system.state_init.detach().cpu().numpy().tolist()[:3]
+            self.xy_init = np.c_[x_init, y_init]
         elif sim_status == "iteration_ended":
             self.update_episode()
             self.update_iteration()
+
+

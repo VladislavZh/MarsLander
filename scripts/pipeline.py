@@ -170,13 +170,9 @@ class PipelineMarsLander(PipelineWithDefaults):
         """
         TODO: change to real parameters
         """
-        # angle_init = 0
         self.animator = AnimatorMarsLander(
-            initial_coords=[7000, 3000, 0], #self.simulator.state_full_init,
-            landscape=self.system.landscape,
-            xs=np.array([self.system.landscape[:, 0].max() - i for i in range(10, 100)]), #self.simulator.state[0],
-            ys=np.array([self.system.landscape[:, 1].max() - i*40 for i in range(10, 100)]), #self.simulator.state[1],
-            angles=np.linspace(0, 45, 9), #self.simulator.state[2],
+            system=self.system,
+            scenario=self.scenario,
         )
 
     def main_loop_visual(self):

@@ -133,24 +133,30 @@ class AnimatorMarsLander(Animator):
         )  # require matplotlib==3.6.0
         self.transform_init = t
         marslander_marker_init = MarkerStyle(self.marslander_symbol_init, transform=t)
-        marslander_marker = MarkerStyle(
+        self.marslander_marker = MarkerStyle(
             self.marslander_symbol, transform=t
         )
 
-        self.marslander_line_init = self.ax.scatter(
+        # print('self.xy_init\n', self.xy_init, file = sys.stderr)
+
+        # self.marslander_line_init = self.ax.scatter(
+        #     *self.xy_init[0], marker=marslander_marker_init
+        # )
+
+        self.marslander_line = self.ax.scatter(
             *self.xy_init[0], marker=marslander_marker_init
         )
 
-        self.marslander_line = self.ax.scatter(
-            *self.xy_init[0], marker=marslander_marker
-        )
-
         self.episodic_scatter_handles = []
-        for _ in range(self.scenario.N_episodes):
-            new_handle = self.ax.scatter(
-                *self.xy_init[0], marker=marslander_marker
+        # for _ in range(self.scenario.N_episodes):
+        #     new_handle = self.ax.scatter(
+        #         *self.xy_init[0], marker=marslander_marker_init
+        #     )
+        #     self.episodic_scatter_handles.append(new_handle)
+        new_handle = self.ax.scatter(
+                *self.xy_init[0], marker=self.marslander_marker
             )
-            self.episodic_scatter_handles.append(new_handle)
+        self.episodic_scatter_handles.append(new_handle)
 
     def update_step(self):
         # breakpoint()
@@ -166,18 +172,27 @@ class AnimatorMarsLander(Animator):
         self.marslander_line.set_transform(t)
 
     def update_episode(self):
+        # breakpoint()
+        x_init, y_init, self.angle_init = self.system.state_init.detach().cpu().numpy().tolist()[:3]
+        self.xy_init = np.c_[x_init, y_init]
+
         offsets = self.marslander_line.get_offsets()
         t = self.marslander_line.get_offset_transform()
         handle = self.episodic_scatter_handles[self.scenario.episode_counter - 1]
         handle.set_offsets(offsets)
         handle.set_transform(t)
+        new_handle = self.ax.scatter(
+                *self.xy_init[0], marker=self.marslander_marker
+            )
+        self.episodic_scatter_handles.append(new_handle)
         self.marslander_line.set_offsets(self.xy_init)
-        self.marslander_line.set_transform(self.transform_init)
+        # self.marslander_line.set_transform(self.transform_init)
+            
 
     def update_iteration(self):
         for handle in self.episodic_scatter_handles:
             handle.set_offsets(self.xy_init)
-            handle.set_transform(self.transform_init)
+            # handle.set_transform(self.transform_init)
 
     def animate(self, k):
         sim_status = self.scenario.step()

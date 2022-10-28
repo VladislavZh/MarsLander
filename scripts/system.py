@@ -19,7 +19,7 @@ class SysMarsLander(System):
         self.width  = 7000
         self.height = 3000
         self.random_landscape = False
-        self.random_initital_point = True #True
+        self.random_initital_point = True
 
         self.landscape, self.platform = self._generate_landscape(
             self.width,

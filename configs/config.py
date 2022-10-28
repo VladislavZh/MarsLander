@@ -29,13 +29,13 @@ class ConfigMarsLander(AbstractConfig):
         parser.add_argument(
             "--N_episodes",
             type=int,
-            default=4,
+            default=20,
             help="Number of episodes in one actor iteration",
         )
         parser.add_argument(
             "--N_iterations",
             type=int,
-            default=10,
+            default=50,
             help="Number of iterations in episodical actor scenario",
         )
 
@@ -49,14 +49,14 @@ class ConfigMarsLander(AbstractConfig):
         parser.add_argument(
             "--learning_rate_actor",
             type=float,
-            default=0.001,
+            default=0.0001,
             help="Size of NN actor learning rate.",
         )
 
         parser.add_argument(
             "--learning_rate_critic",
             type=float,
-            default=0.001,
+            default=0.0001,
             help="Size of NN critic learning rate.",
         )
 

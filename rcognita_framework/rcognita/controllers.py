@@ -1,7 +1,7 @@
 """
 This module contains high-level structures of controllers (agents).
 
-Remarks: 
+Remarks:
 
 - All vectors are treated as of type [n,]
 - All buffers are treated as of type [L, n] where each row is a vector

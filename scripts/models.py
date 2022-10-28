@@ -56,7 +56,10 @@ class ModelActorMarsLander(ModelNN):
         if weights is not None:
             self.update(weights)
         output = self.net(observation)
-        return output
+        tmp = output.clone()
+        tmp[0] = torch.nn.functional.softplus(output[0])
+        tmp[1] = torch.nn.functional.sigmoid(output[1])
+        return tmp
 
 
 class ModelCriticMarsLander(ModelNN):

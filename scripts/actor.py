@@ -52,8 +52,13 @@ class ActorMarsLander(Actor):
         self,
         observation
     ) -> None:
-        loss = self.objective(self.model(observation), observation)
+        action = self.model(observation)
+        loss = self.objective(action, observation)
         loss.backward()
+        self.action = action.detach().cpu().numpy()
+        self.action_old = self.action
+        self.action[0] = np.clip(self.action[0], a_min=self.action_min[0], a_max=self.action_max[0])
+        self.action[1] = np.clip(self.action[1], a_min=self.action_min[1], a_max=self.action_max[1])
 
     def reset(
         self

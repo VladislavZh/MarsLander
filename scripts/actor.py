@@ -15,10 +15,12 @@ class ActorMarsLander(Actor):
     def __init__(
         self,
         state_to_observation,
+        in_bound,
         *args,
         **kwargs
     ) -> None:
         self.state_to_observation = state_to_observation
+        self.in_bound = in_bound
         super().__init__(*args, **kwargs)
 
     def objective(
@@ -52,13 +54,17 @@ class ActorMarsLander(Actor):
         self,
         observation
     ) -> None:
-        action = self.model(observation)
-        loss = self.objective(action, observation)
-        loss.backward()
-        self.action = action.detach().cpu().numpy()
-        self.action_old = self.action
-        self.action[0] = np.clip(self.action[0], a_min=self.action_min[0], a_max=self.action_max[0])
-        self.action[1] = np.clip(self.action[1], a_min=self.action_min[1], a_max=self.action_max[1])
+        if self.in_bound(observation[-5:-3]):
+            action = self.model(observation)
+            loss = self.objective(action, observation)
+            loss.backward()
+            self.action = action.detach().cpu().numpy()
+            self.action_old = self.action
+            self.action[0] = np.clip(self.action[0], a_min=self.action_min[0], a_max=self.action_max[0])
+            self.action[1] = np.clip(self.action[1], a_min=self.action_min[1], a_max=self.action_max[1])
+        else:
+            self.action = np.array([0,0])
+            self.action_old = self.action
 
     def reset(
         self

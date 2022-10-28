@@ -3,7 +3,7 @@
 """
 This module contains an interface class `animator` along with concrete realizations, each of which is associated with a corresponding system.
 
-Remarks: 
+Remarks:
 
 - All vectors are treated as of type [n,]
 - All buffers are treated as of type [L, n] where each row is a vector
@@ -73,6 +73,7 @@ class AnimatorMarsLander(Animator):
             xlabel="",
             ylabel="",
         )
+        self.ax.set_ylim((0,3000))
         self.ax.set_title(label="Mars Lander")
         self.ax.set_aspect("equal")
 
@@ -128,12 +129,12 @@ class AnimatorMarsLander(Animator):
         self.scale = 5.0
 
         t = (
-            Affine2D().scale(self.scale).rotate_deg(180 + self.angle_init * 180 / np.pi)
+            Affine2D().scale(self.scale).rotate_deg(180 - self.angle_init * 180 / np.pi)
         )  # require matplotlib==3.6.0
         self.transform_init = t
         marslander_marker_init = MarkerStyle(self.marslander_symbol_init, transform=t)
         marslander_marker = MarkerStyle(
-            self.marslander_symbol, transform=t 
+            self.marslander_symbol, transform=t
         )
 
         self.marslander_line_init = self.ax.scatter(
@@ -157,7 +158,7 @@ class AnimatorMarsLander(Animator):
         x, y, angle = self.scenario.observation[-5:-2]
 
         t = (
-            Affine2D().rotate_deg(angle * 180 / np.pi)
+            Affine2D().rotate_deg(-angle * 180 / np.pi)
         )  # require matplotlib==3.6.0
         self.marslander_line.set_offsets(
             np.c_[x, y],
@@ -191,5 +192,3 @@ class AnimatorMarsLander(Animator):
         elif sim_status == "iteration_ended":
             self.update_episode()
             self.update_iteration()
-
-

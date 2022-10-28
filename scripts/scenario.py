@@ -33,6 +33,7 @@ class EpisodicScenarioMarsLander(EpisodicScenario):
     def iteration_update(self):
         mean_sum_of_squared_TD = self.get_mean(self.squared_TD_sums_of_episodes)
         self.square_TD_means.append(mean_sum_of_squared_TD.detach().numpy())
+        print(f"TD Loss = {mean_sum_of_squared_TD.detach().numpy()}")
 
         self.critic.optimizer.optimize(
             objective=self.get_mean,

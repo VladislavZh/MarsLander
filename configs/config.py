@@ -56,7 +56,7 @@ class ConfigMarsLander(AbstractConfig):
         parser.add_argument(
             "--learning_rate_critic",
             type=float,
-            default=0.00000001,
+            default=0.001,
             help="Size of NN critic learning rate.",
         )
 
@@ -99,14 +99,14 @@ class ConfigMarsLander(AbstractConfig):
         parser.add_argument(
             "--fuel_consumption_coeff",
             type=float,
-            default=10.0,
+            default=0.0,
             help="Fuel consumption cost multiplier.",
         )
 
         parser.add_argument(
             "--angle_constraint_coeff",
             type=float,
-            default=10.0,
+            default=0.0,
             help="Angle cost multiplier.",
         )
 

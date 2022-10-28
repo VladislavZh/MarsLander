@@ -100,6 +100,7 @@ class PipelineMarsLander(PipelineWithDefaults):
         """
 
         self.critic = CriticMarsLander(
+            in_bound=self.system._in_borders,
             dim_input=self.dim_input,
             dim_output=self.dim_output,
             data_buffer_size=self.data_buffer_size,
@@ -111,6 +112,7 @@ class PipelineMarsLander(PipelineWithDefaults):
         )
 
         self.actor = ActorMarsLander(
+            in_bound=self.system._in_borders,
             state_to_observation=self.system.out,
             dim_input=self.dim_input,
             dim_output=self.dim_output,

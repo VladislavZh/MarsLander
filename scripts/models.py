@@ -57,8 +57,8 @@ class ModelActorMarsLander(ModelNN):
             self.update(weights)
         output = self.net(observation)
         tmp = output.clone()
-        tmp[0] = torch.nn.functional.softplus(output[0])
-        tmp[1] = torch.nn.functional.sigmoid(output[1])
+        tmp[0] = 5*torch.nn.functional.softplus(output[0])
+        tmp[1] = 2*torch.nn.functional.sigmoid(output[1])-1
         return tmp
 
 

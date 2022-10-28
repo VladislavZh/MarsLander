@@ -22,9 +22,11 @@ class CriticMarsLander(Critic):
     """
     def __init__(
         self,
+        in_bound,
         *args,
         **kwargs
     ) -> None:
+        self.in_bound = in_bound
         super().__init__(*args, **kwargs)
 
     def objective(
@@ -59,4 +61,6 @@ class CriticMarsLander(Critic):
 
             critic_objective += 1/2*TD**2
 
+        if not self.in_bound(observation_buffer[-1,-5:-3]):
+            critic_objective *= 0
         return critic_objective

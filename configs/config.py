@@ -81,7 +81,7 @@ class ConfigMarsLander(AbstractConfig):
         parser.add_argument(
             "--data_buffer_size",
             type=int,
-            default=10,
+            default=100,
             help="Size of the buffer (experience replay) for model estimation, agent learning etc.",
         )
 

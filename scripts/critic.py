@@ -59,15 +59,11 @@ class CriticMarsLander(Critic):
 
             TD = (critic_cur - self.discount_factor * critic_next - reward)
 
-            critic_objective += 1/2*TD**2
+            if self.in_bound(observation_buffer[i-1,-5:-3]):
+                critic_objective += 1/2*TD**2
+            else:
+                critic_objective += 0*TD**2
 
-        use_point = False
-        for i in range(self.data_buffer_size - 1, -1, -1):
-            if not self.in_bound(observation_buffer[i,-5:-3]):
-                use_point = True
-
-        if not use_point:
-            critic_objective *= 0
         return critic_objective
 
     def update(self, constraint_functions=(), time=None):

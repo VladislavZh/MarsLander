@@ -211,6 +211,7 @@ class TorchOptimizer(BaseOptimizer):
             loss = objective(model_input)
             loss_before = loss.detach().numpy()
             loss.backward()
+            torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=1)
             optimizer.step()
             # optimizer.zero_grad()
             loss_after = objective(model_input).detach().numpy()

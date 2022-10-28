@@ -1,6 +1,7 @@
 from rcognita_framework.rcognita.scenarios import EpisodicScenario
 from rcognita_framework.rcognita.optimizers import TorchOptimizer
 
+import torch
 
 def get_mean(array):
     return sum(array)/len(array)
@@ -46,6 +47,7 @@ class EpisodicScenarioMarsLander(EpisodicScenario):
         for p in self.actor.model.parameters():
             p.grad /= len(self.squared_TD_sums_of_episodes)
 
+        torch.nn.utils.clip_grad_norm_(self.actor.model.parameters(), max_norm=1)
         self.actor.optimizer.step()
 
     def reset_iteration(self):

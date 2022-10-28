@@ -5,7 +5,7 @@ Module that contains state or observation (depending on the context) predictors.
 
 import numpy as np
 from abc import ABCMeta, abstractmethod
-
+import torch
 from .utilities import rc
 
 
@@ -55,15 +55,20 @@ class EulerPredictor(BasePredictor):
 
     def predict_sequence(self, observation, action_sequence):
 
-        observation_sequence = rc.zeros(
-            [self.prediction_horizon, self.dim_output], prototype=action_sequence
-        )
+        if type(action_sequence[0,:]) == torch.Tensor:
+            observation_sequence = torch.zeros(
+                [self.prediction_horizon, self.dim_output]
+            )
+        else:
+            observation_sequence = np.zeros(
+                [self.prediction_horizon, self.dim_output]
+            )
         current_observation = observation
 
         for k in range(self.prediction_horizon):
             current_action = action_sequence[k, :]
             next_observation = self.predict(current_observation, current_action)
-            observation_sequence[k, :] = rc.array(self.sys_out(next_observation), prototype=action_sequence)
+            observation_sequence[k, :] = self.sys_out(next_observation)#, prototype=action_sequence)
             current_observation = next_observation
         return observation_sequence
 

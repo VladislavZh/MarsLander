@@ -41,7 +41,7 @@ class EpisodicScenarioMarsLander(EpisodicScenario):
             model_input=self.squared_TD_sums_of_episodes,
         )
 
-        for p in self.actor.model.parameter():
+        for p in self.actor.model.parameters():
             p.grad /= len(self.squared_TD_sums_of_episodes)
 
         self.actor.optimizer.step()

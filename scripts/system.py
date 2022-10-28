@@ -133,7 +133,7 @@ class SysMarsLander(System):
     def get_radial(dx,dy):
         r   = rc.sqrt(dx**2 + dy**2)
         sin_psi = dx/r
-        if type(sin_psi) == torch.tensor:
+        if type(sin_psi) == torch.Tensor:
             psi = torch.arcsin(sin_psi)
         else:
             psi = np.arcsin(sin_psi)
@@ -241,13 +241,20 @@ class SysMarsLander(System):
 
         g = self.pars[0]
 
-        Dstate = rc.zeros(5)
+        if type(action) == torch.Tensor:
+            Dstate = torch.zeros(5)
+        else:
+            Dstate = np.zeros(5)
         if self._in_borders(state):
             Dstate[0] = state[3]  # dx/dt
             Dstate[1] = state[4]  # dy/dt
             Dstate[2] = action[1] # dphi/dt
-            Dstate[3] =  action[0] * rc.sin(state[2]) # acceleration x
-            Dstate[4] = - g + action[0] * rc.cos(state[2]) # acceleration y
+            if type(action) == torch.Tensor:
+                Dstate[3] =  action[0] * torch.sin(state[2]) # acceleration x
+                Dstate[4] = - g + action[0] * torch.cos(state[2]) # acceleration y
+            else:
+                Dstate[3] =  action[0] * np.sin(state[2]) # acceleration x
+                Dstate[4] = - g + action[0] * np.cos(state[2]) # acceleration y
 
         return Dstate
 
@@ -274,7 +281,7 @@ class SysMarsLander(System):
         left = self._closest_point(state, 'left')
         right = self._closest_point(state, 'right')
 
-        if type(r_psi) == torch.tensor:
+        if type(r_psi) == torch.Tensor:
             observation = torch.cat([r_psi,torch.tensor([phi]),rays_points,left,right,torch.tensor(state)], dim=-1) # dim_out = 28
         else:
             observation = np.concatenate([r_psi,np.array([phi]),rays_points,left,right,state])

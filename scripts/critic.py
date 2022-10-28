@@ -64,3 +64,6 @@ class CriticMarsLander(Critic):
         if not self.in_bound(observation_buffer[-1,-5:-3]):
             critic_objective *= 0
         return critic_objective
+
+    def update(self, constraint_functions=(), time=None):
+        return

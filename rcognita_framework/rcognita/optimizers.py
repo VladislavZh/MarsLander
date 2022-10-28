@@ -214,8 +214,8 @@ class TorchOptimizer(BaseOptimizer):
             optimizer.step()
             # optimizer.zero_grad()
             loss_after = objective(model_input).detach().numpy()
-            print(loss_before - loss_after)
             if self.verbose:
+                print(loss_before - loss_after)
                 print(objective(model_input))
         self.loss_history.append([loss_before, loss_after])
 

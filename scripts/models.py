@@ -138,7 +138,7 @@ class ModelRunningObjectiveMarsLander:
         """
             Computes Mars Lander running objective
         """
-        distance_cost    = observation[...,0]  # distance to the landing platform
+        distance_cost    = observation[...,0]/70000  # distance to the landing platform
         fuel_consumption = action[...,0]       # fuel constraint
         angle_cost       = observation[..., 2] # angle constraint
 

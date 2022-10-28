@@ -28,12 +28,12 @@ class ActorMarsLander(Actor):
         action,
         observation
     ) -> torch.Tensor:
-        action_sequence_reshaped = rc.reshape(action, [1, self.dim_input])
+        action_sequence_reshaped = action.unsqueeze(0)
 
         state_sequence = [observation[-5:]]
 
         observation_sequence_predicted = self.predictor.predict_sequence(
-            observation[-5:], action_sequence_reshaped
+            torch.Tensor(observation[-5:]), action_sequence_reshaped
         )
 
         observation_sequence = rc.vstack(
@@ -57,6 +57,7 @@ class ActorMarsLander(Actor):
         if self.in_bound(observation[-5:-3]):
             action = self.model(observation)
             loss = self.objective(action, observation)
+            loss = action @ action
             loss.backward()
             self.action = action.detach().cpu().numpy()
             self.action_old = self.action

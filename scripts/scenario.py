@@ -12,7 +12,6 @@ class EpisodicScenarioMarsLander(EpisodicScenario):
         self.square_TD_means = []
 
     def reload_pipeline(self):
-        print('Reload')
         self.sim_status = 1
         self.time = 0
         self.time_old = 0

@@ -16,7 +16,21 @@ class ModelActorMarsLander(ModelNN):
         super().__init__(*args, **kwargs)
 
         # architecture
-        self.fc1 = nn.Linear(dim_observation, dim_action, bias=False)
+        self.net = nn.Sequential(
+            nn.Linear(dim_observation, 100),
+            nn.LeakyReLU(0.1),
+            nn.Linear(100, 100),
+            nn.LeakyReLU(0.1),
+            nn.Linear(100, 100),
+            nn.LeakyReLU(0.1),
+            nn.Linear(100, 100),
+            nn.LeakyReLU(0.1),
+            nn.Linear(100, 100),
+            nn.LeakyReLU(0.1),
+            nn.Linear(100, 100),
+            nn.LeakyReLU(0.1),
+            nn.Linear(100, dim_action)
+        )
 
         if weights is not None:
             self.load_state_dict(weights)
@@ -41,8 +55,8 @@ class ModelActorMarsLander(ModelNN):
         #pass
         if weights is not None:
             self.update(weights)
-        x = self.fc1(observation) #self.net(input_tensor)
-        return x
+        output = self.net(observation)
+        return output
 
 
 class ModelCriticMarsLander(ModelNN):
@@ -55,8 +69,21 @@ class ModelCriticMarsLander(ModelNN):
         super().__init__(*args, **kwargs)
 
         # architecture
-        self.fc1 = nn.Linear(dim_observation+dim_action, dim_observation, bias=False)
-        #print('inside critic')
+        self.net = nn.Sequential(
+            nn.Linear(dim_observation+dim_action, 100),
+            nn.LeakyReLU(0.1),
+            nn.Linear(100, 100),
+            nn.LeakyReLU(0.1),
+            nn.Linear(100, 100),
+            nn.LeakyReLU(0.1),
+            nn.Linear(100, 100),
+            nn.LeakyReLU(0.1),
+            nn.Linear(100, 100),
+            nn.LeakyReLU(0.1),
+            nn.Linear(100, 100),
+            nn.LeakyReLU(0.1),
+            nn.Linear(100, 1)
+        )
 
         if weights is not None:
             self.load_state_dict(weights)
@@ -82,10 +109,9 @@ class ModelCriticMarsLander(ModelNN):
         if weights is not None:
             self.update(weights)
 
-        output = self.fc1(observation_action) #self.net(input_tensor)
-        x = torch.sum(-output*output)
+        output = self.net(observation_action)
 
-        return x
+        return output
 
 
 class ModelRunningObjectiveMarsLander:

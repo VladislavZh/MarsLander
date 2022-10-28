@@ -63,7 +63,7 @@ class EulerPredictor(BasePredictor):
         for k in range(self.prediction_horizon):
             current_action = action_sequence[k, :]
             next_observation = self.predict(current_observation, current_action)
-            observation_sequence[k, :] = self.sys_out(next_observation)
+            observation_sequence[k, :] = rc.array(self.sys_out(next_observation), prototype=action_sequence)
             current_observation = next_observation
         return observation_sequence
 

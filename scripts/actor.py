@@ -10,126 +10,55 @@ from typing import Optional
 
 class ActorMarsLander(Actor):
     """
-        TODO: Mars Lander actor model description
+        Mars Lander actor model
     """
     def __init__(
         self,
+        state_to_observation,
         *args,
         **kwargs
     ) -> None:
+        self.state_to_observation = state_to_observation
         super().__init__(*args, **kwargs)
 
-    def update(
-        self,
-        observation: np.array
-    ) -> None:
-        """
-        TODO: Have to store action in self.action for correct controller work
-        """
-        pass
-
-    def reset(
-        self
-    ) -> None:
-        super().reset()
-
-    def get_action(self):
-        return self.action
-
-class ActorMarsLanderAC(Actor):
-    """
-        TODO: Mars Lander actor model description
-    """
-    def __init__(
-        self,
-        *args,
-        **kwargs,
-    ) -> None:
-        super().__init__(*args, **kwargs)
-    '''
-    def update(
-        self,
-        observation: np.array
-    ) -> None:
-        """
-        TODO: Have to store action in self.action for correct controller work
-        """
-        action_sample = self.model(observation)
-        self.action = np.array(np.clip(action_sample, self.action_bounds[0], self.action_bounds[1]))
-        self.action_old = self.action
-
-        #current_gradient = self.model.compute_gradient(action_sample)
-
-        #self.store_gradient(current_gradient)
-        #pass
-        '''
-    print('inside actor')
-    '''def update(
-        self,
-        observation: np.array
-    ) -> None:
-        self.action_bounds ={'lb':[0, -1],'ub':[5,1]}
-        action_sample = self.model(observation)
-        print(observation.shape, 'observatio')
-        print('action shape', action_sample.shape)
-        self.action = action_sample # np.array(np.clip(action_sample, self.action_bounds[0], self.action_bounds[1]))
-        self.action_old = self.action
-        self.losses_iter.append(self.objective(observation))'''
-
-    def reset(
-        self
-    ) -> None:
-        super().reset()
-        self.losses_iter = []
-
-    def get_action(self):
-        return self.action
-
-    def parameters(self):
-        return self.actor.parameters()
-
-    def objective(
-        self,
-        observation
-    ) -> torch.Tensor:
-        """
-        Objective of the critic, say, a squared temporal difference.
-
-        """
-        actor_objective = 0
-        improved_value = self.running_objective + self.discount_factor*self.critic(self.actor(observation))
-        actor_objective += -improved_value
-        self.losses_iter.append(self.objective(observation))
-        return actor_objective
-
-'''
     def objective(
         self,
         action,
         observation
     ) -> torch.Tensor:
-        """
-        Objective of the critic, say, a squared temporal difference.
+        action_sequence_reshaped = rc.reshape(action, [1, self.dim_input])
 
-        """
-        actor_objective = 0
-        improved_value = self.running_objective + self.discount_factor* self.critic(next_state)
-        return -improved_value.mean()
-'''
+        state_sequence = [observation[-5:]]
 
-class ActorProbabilisticEpisodicACMars(ActorProbabilisticEpisodic):
-    def update(self, observation):
-        #############################################
-        # YOUR CODE BELOW
-        #############################################
-        action_sample = self.model.sample_from_distribution(observation)
-        self.action = np.array(np.clip(action_sample, self.action_bounds[0], self.action_bounds[1]))
-        self.action_old = self.action
+        observation_sequence_predicted = self.predictor.predict_sequence(
+            observation[-5:], action_sequence_reshaped
+        )
 
-        current_gradient = self.model.compute_gradient(action_sample)
+        observation_sequence = rc.vstack(
+            (
+                rc.reshape(rc.array(observation, prototype=action), [1, self.dim_output]),
+                observation_sequence_predicted,
+            )
+        )
+        actor_objective = self.running_objective(
+            observation_sequence[0, :], action_sequence_reshaped
+        ) + self.discount_factor * self.critic(
+            observation_sequence[1, :], self.model(observation_sequence[1, :], use_stored_weights=True), use_stored_weights=True
+        )
 
-        self.store_gradient(current_gradient)
+        return - actor_objective
 
-        #############################################
-        # YOUR CODE ABOVE
-        #############################################
+    def update(
+        self,
+        observation
+    ) -> None:
+        loss = self.objective(self.model(observation), observation)
+        loss.backward()
+
+    def reset(
+        self
+    ) -> None:
+        super().reset()
+
+    def get_action(self):
+        return self.action

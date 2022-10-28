@@ -18,7 +18,7 @@ from typing import Optional
 
 class CriticMarsLander(Critic):
     """
-        TODO: Mars Lander critic model description
+        Mars Lander critic
     """
     def __init__(
         self,
@@ -34,7 +34,6 @@ class CriticMarsLander(Critic):
     ) -> torch.Tensor:
         """
         Objective of the critic, say, a squared temporal difference.
-
         """
         if data_buffer is None:
             observation_buffer = self.observation_buffer
@@ -45,42 +44,6 @@ class CriticMarsLander(Critic):
 
         critic_objective = 0
 
-        # TODO: code
-
-        return critic_objective
-
-
-class CriticMarsLanderAC(Critic):
-    """
-        TODO: Mars Lander critic model description
-    """
-    def __init__(
-        self,
-        *args,
-        **kwargs
-    ) -> None:
-        super().__init__(*args, **kwargs)
-        #print('inside ACtor critic')
-
-    def objective(
-        self,
-        data_buffer: Optional[np.array] = None,
-        weights: Optional[dict] = None
-    ) -> torch.Tensor:
-        """
-        Objective of the critic, say, a squared temporal difference.
-
-        """
-        if data_buffer is None:
-            observation_buffer = self.observation_buffer
-            action_buffer = self.action_buffer
-        else:
-            observation_buffer = data_buffer["observation_buffer"]
-            action_buffer = data_buffer["action_buffer"]
-
-        critic_objective = 0
-
-        # TODO: code
         for i in range(self.data_buffer_size - 1, 0, -1):
             x_cur = observation_buffer[i-1, :]
             x_next = observation_buffer[i, :]
@@ -97,5 +60,3 @@ class CriticMarsLanderAC(Critic):
             critic_objective += 1/2*TD**2
 
         return critic_objective
-
-

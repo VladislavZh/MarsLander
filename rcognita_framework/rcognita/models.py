@@ -65,20 +65,20 @@ class ModelSS:
     model_name = "state-space"
     """
     State-space model
-            
+
     .. math::
         \\begin{array}{ll}
 			\\hat x^+ & = A \\hat x + B u, \\newline
 			y^+  & = C \\hat x + D u.
-        \\end{array}                 
-        
+        \\end{array}
+
     Attributes
-    ---------- 
+    ----------
     A, B, C, D : : arrays of proper shape
         State-space model parameters.
     initial_guessset : : array
         Initial state estimate.
-            
+
     """
 
     def __init__(self, A, B, C, D, initial_guessest):
@@ -382,6 +382,8 @@ class ModelNN(nn.Module):
     def __call__(self, *argin, weights=None, use_stored_weights=False):
         if len(argin) > 1:
             argin = rc.concatenate(argin)
+        else:
+            argin = argin[0]
 
         argin = torch.tensor(argin)
 

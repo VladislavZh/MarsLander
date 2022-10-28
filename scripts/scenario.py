@@ -6,125 +6,46 @@ def get_mean(array):
     return sum(array)/len(array)
 
 class EpisodicScenarioMarsLander(EpisodicScenario):
-    def __init__(
-        self,
-        *args,
-        **kwargs
-    ) -> None:
-        super().__init__(*args, **kwargs)
-        # Question: how do we update actor correctly? Mb we need online scenario?
-
-class EpisodicScenarioMarsLanderAC(EpisodicScenario):
-    def __init__(
-        self,
-        *args,
-        **kwargs
-    ) -> None:
-        super().__init(*args, **kwargs)
-        # Question: how do we update actor correctly? Mb we need online scenario?
-        self.actor_optimizer = TorchOptimizer({"lr": 0.01})
-        self.critic_optimizer = TorchOptimizer({"lr": 0.01})
-        self.squared_TD_sums_of_episodes = []
-        self.square_TD_means = []
-
-    def reset_episode(self):
-        #############################################
-        # YOUR CODE BELOW
-        #############################################
-        self.squared_TD_sums_of_episodes.append(self.critic.objective())
-        #self.actor_loss_sums_of_episodes.append(self.actor.objective())
-        #############################################
-        # YOUR CODE ABOVE
-        #############################################
-        super().reset_episode()
-
-    def iteration_update(self):
-        """
-        Proposition: create a lambda function that evaluates mean
-        to pass this function as an objective into your optimizer.
-        Keep in mind that you must not detach your tensors with inplace somehow.
-        If you call, for example, torch.tensor(tens), it will detach tens automatically
-        """
-        mean_sum_of_squared_TD = get_mean(self.squared_TD_sums_of_episodes) #just for visualization purposes
-        #mean_sum_of_squared_TD = get_mean(self.squared_TD_sums_of_episodes) #just for visualization purposes
-        self.square_TD_means.append(mean_sum_of_squared_TD.detach().numpy()) #just for visualization purposes
-        self.actor_loss_sums_of_episodes = self.actor.losses_iter
-        #############################################
-        # YOUR CODE BELOW
-        #############################################
-        self.critic_optimizer.optimize(
-            objective=get_mean,
-            model=self.critic.model,
-            model_input=self.squared_TD_sums_of_episodes,
-        )
-        self.actor_optimizer.optimize(
-            objective=get_mean,
-            model=self.actor.model,
-            model_input=self.actor_loss_sums_of_episodes,
-        )
-        #############################################
-        # YOUR CODE ABOVE
-        #############################################
-        super().iteration_update()
-
-    def reset_iteration(self):
-        #############################################
-        # YOUR CODE BELOW
-        #############################################
-        self.squared_TD_sums_of_episodes = []
-        self.actor_loss_sums_of_episodes = []
-        #############################################
-        # YOUR CODE ABOVE
-        #############################################
-        super().reset_iteration()
-
-####################################################
-class EpisodicScenarioDQN(EpisodicScenario):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.critic_optimizer = TorchOptimizer({"lr": 0.01})
         self.squared_TD_sums_of_episodes = []
         self.square_TD_means = []
 
+    def reload_pipeline(self):
+        self.sim_status = 1
+        self.time = 0
+        self.time_old = 0
+        self.outcome = 0
+        self.action = self.action_init
+        self.system.reset()
+        self.state_init = self.system.state_init
+        self.actor.reset()
+        self.critic.reset()
+        self.controller.reset(time_start=0)
+        self.simulator.state_full_init = self.system.state_init
+        self.simulator.reset()
+        self.observation = self.system.out(self.state_init, time=0)
+        self.sim_status = 0
+
     def reset_episode(self):
-        #############################################
-        # YOUR CODE BELOW
-        #############################################
         self.squared_TD_sums_of_episodes.append(self.critic.objective())
-        #############################################
-        # YOUR CODE ABOVE
-        #############################################
-        super().reset_episode()
 
     def iteration_update(self):
-        """
-        Proposition: create a lambda function that evaluates mean
-        to pass this function as an objective into your optimizer.
-        Keep in mind that you must not detach your tensors with inplace somehow.
-        If you call, for example, torch.tensor(tens), it will detach tens automatically
-        """
-        mean_sum_of_squared_TD = get_mean(self.squared_TD_sums_of_episodes) #just for visualization purposes
-        self.square_TD_means.append(mean_sum_of_squared_TD.detach().numpy()) #just for visualization purposes
-        print(self.square_TD_means[-1])
-        #############################################
-        # YOUR CODE BELOW
-        #############################################
-        self.critic_optimizer.optimize(
-            objective=get_mean,
+        mean_sum_of_squared_TD = self.get_mean(self.squared_TD_sums_of_episodes)
+        self.square_TD_means.append(mean_sum_of_squared_TD.detach().numpy())
+
+        self.critic.optimizer.optimize(
+            objective=self.get_mean,
             model=self.critic.model,
             model_input=self.squared_TD_sums_of_episodes,
         )
-        #############################################
-        # YOUR CODE ABOVE
-        #############################################
-        super().iteration_update()
+
+        for p in self.actor.model.parameter():
+            p.grad /= len(self.squared_TD_sums_of_episodes)
+
+        self.actor.optimizer.step()
 
     def reset_iteration(self):
-        #############################################
-        # YOUR CODE BELOW
-        #############################################
         self.squared_TD_sums_of_episodes = []
-        #############################################
-        # YOUR CODE ABOVE
-        #############################################
+        self.actor.optimizer.zero_grad()
         super().reset_iteration()

@@ -2,131 +2,145 @@ from rcognita_framework.pipelines.config_blueprints import AbstractConfig, Rcogn
 from collections import namedtuple
 import numpy as np
 
+
 class ConfigMarsLander(AbstractConfig):
     def __init__(self):
         self.config_name = "mars-lander"
 
     def argument_parser(self):
-        # print("argument_parser")
-        # parser = RcognitaArgParser(description="mars-lander")
+        description = (
+            "Agent-environment pipeline: Mars lander on a random surface."
+        )
 
-        # parser.add_argument(
-        #     "--dim_state",
-        #     type=int,
-        #     default=2,
-        #     help="dim_state",
-        # )
+        parser = RcognitaArgParser(description=description)
 
-        # parser.add_argument(
-        #     "--dim_input",
-        #     type=int,
-        #     default=2,
-        #     help="dim_input",
-        # )
+        parser.add_argument(
+            "--is_playback", action="store_true", help="Flag to playback.",
+        )
 
-        # parser.add_argument(
-        #     "--dim_output",
-        #     type=int,
-        #     default=1,
-        #     help="dim_output",
-        # )
+        parser.add_argument(
+            "--t1_critic",
+            type=float,
+            metavar="time_final_critic",
+            dest="time_final_critic",
+            default=100.0,
+            help="Final time of critic episode.",
+        )
+        parser.add_argument(
+            "--N_episodes",
+            type=int,
+            default=4,
+            help="Number of episodes in one actor iteration",
+        )
+        parser.add_argument(
+            "--N_iterations",
+            type=int,
+            default=10,
+            help="Number of iterations in episodical actor scenario",
+        )
 
-        # parser.add_argument(
-        #     "--dim_disturb",
-        #     type=int,
-        #     default=1,
-        #     help="dim_disturb",
-        # )
+        parser.add_argument(
+            "--pred_step_size_multiplier",
+            type=float,
+            default=1.0,
+            help="Size of each prediction step in seconds is a pred_step_size_multiplier multiple of controller sampling time sampling_time.",
+        )
 
-        # parser.add_argument(
-        #     "--g",
-        #     type=float,
-        #     default=9.8,
-        #     help="g",
-        # )
+        parser.add_argument(
+            "--learning_rate_actor",
+            type=float,
+            default=0.001,
+            help="Size of NN actor learning rate.",
+        )
 
-        # parser.add_argument(
-        #     "--g",
-        #     type=float,
-        #     default=9.8,
-        #     help="g",
-        # )
+        parser.add_argument(
+            "--learning_rate_critic",
+            type=float,
+            default=0.00000001,
+            help="Size of NN critic learning rate.",
+        )
 
-        # parser.add_argument(
-        #     "--g",
-        #     type=float,
-        #     default=9.8,
-        #     help="g",
-        # )
+        parser.add_argument(
+            "--weight_decay_actor",
+            type=float,
+            default=0.00001,
+            help="Size of NN actor learning weight decay.",
+        )
 
-        # return parser.parse_args()
-        return dict(sys_type='diff_eqn',
-                    dim_state=5,
-                    dim_input=2,
-                    dim_output=25,
-                    dim_disturb=0,
-                    g=3.7,
-                    is_dynamic_controller=False,
-                    is_disturb=False,
-                    #prediction_horizon=10,
-                    fuel_consumption_coeff=0.95,
-                    angle_constraint_coeff=np.pi / 2,
-                    actor_lr=1e-3,
-                    actor_weight_decay=1e-5,
-                    critic_lr=1e-3,
-                    critic_weight_decay=1e-5,
-                    actor_iterations=10,
-                    critic_iterations=10,
-                    data_buffer_size=4,
-                    discount_factor=0.99,
-                    sampling_time=1,
-                    control_mode="Actor-Critic",
-                    action_bounds={'lb':[0, -1],'ub':[5,1]},
-                    action_init=[],
-                    predictor=[],
-                    datafiles=[""],
-                    time_start=0,
-                    time_final=200,
-                    no_print=True,
-                    is_log=False,
-                    N_episodes=1,
-                    N_iterations=10,
-                    no_visual=True,
-                    save_trajectory=True,
-                    critic_period=1,
-                    atol=1e-5,
-                    rtol=1e-3
+        parser.add_argument(
+            "--weight_decay_critic",
+            type=float,
+            default=0.00001,
+            help="Size of NN critic learning weight decay.",
+        )
 
-                    # action_min=0,
-                    # action_max=1e10,
-                )
+        parser.add_argument(
+            "--speedup", type=int, default=20, help="Animation speed up",
+        )
 
+        parser.add_argument(
+            "--data_buffer_size",
+            type=int,
+            default=10,
+            help="Size of the buffer (experience replay) for model estimation, agent learning etc.",
+        )
 
-        #         action_bounds=[],
+        parser.add_argument(
+            "--discount_factor", type=float, default=1.0, help="Discount factor."
+        )
 
-        # predictor=[],
-        # optimizer=None,
-        # critic=[],
-        # running_objective=[],
-        # model=None,
-        # discount_factor=1,
+        parser.add_argument(
+            "--critic_period_multiplier",
+            type=float,
+            default=1.0,
+            help="Critic is updated every critic_period_multiplier times sampling_time seconds.",
+        )
 
-        #     self.critic = CriticMarsLander(
-        #     optimizer=self.critic_optimizer,
-        #     model=self.critic_model,
-        # )
+        parser.add_argument(
+            "--fuel_consumption_coeff",
+            type=float,
+            default=10.0,
+            help="Fuel consumption cost multiplier.",
+        )
 
-        # self.actor = ActorMarsLander(
-        #     self.dim_input,
-        #     self.dim_output,
-        #     self.control_mode, # what is it?
-        #     self.action_bounds, # maybe better to do it implicitly?
-        #     predictor=self.predictor,
-        #     optimizer=self.actor_optimizer,
-        #     critic=self.critic,
-        #     running_objective=self.running_objective,
-        #     model=self.actor_model,
-        # )
+        parser.add_argument(
+            "--angle_constraint_coeff",
+            type=float,
+            default=10.0,
+            help="Angle cost multiplier.",
+        )
+
+        args = parser.parse_args()
+        return args
 
     def pre_processing(self):
-        pass
+        self.trajectory = []
+        self.dim_state = 5
+        self.dim_input = 2
+        self.dim_output = 28
+        self.dim_disturb = 0
+
+        self.pred_step_size = self.sampling_time * self.pred_step_size_multiplier
+        self.critic_period = self.sampling_time * self.critic_period_multiplier
+
+        self.is_disturb = 0
+
+        self.is_dynamic_controller = 0
+
+        self.time_start = 0
+
+        self.action_init = np.zeros(self.dim_input)
+
+        # Solver
+        self.atol = 1e-5
+        self.rtol = 1e-3
+
+        # Control constraints
+        self.action_bounds = np.array([[0, 5],[-1,1]])
+        self.prediction_horizon = 1
+
+        # System parameters
+        self.g = 3.7
+        self.observation_target = []
+
+        self.control_mode = "Actor-Critic"

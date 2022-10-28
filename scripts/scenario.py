@@ -12,6 +12,7 @@ class EpisodicScenarioMarsLander(EpisodicScenario):
         self.square_TD_means = []
 
     def reload_pipeline(self):
+        print('Reload')
         self.sim_status = 1
         self.time = 0
         self.time_old = 0
@@ -29,6 +30,7 @@ class EpisodicScenarioMarsLander(EpisodicScenario):
 
     def reset_episode(self):
         self.squared_TD_sums_of_episodes.append(self.critic.objective())
+        self.reload_pipeline()
 
     def iteration_update(self):
         mean_sum_of_squared_TD = self.get_mean(self.squared_TD_sums_of_episodes)

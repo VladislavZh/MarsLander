@@ -52,7 +52,6 @@ class OptimalController(ABC):
 
         if is_critic_update:
             self.critic_clock = time
-
         if (
             time_in_sample >= self.sampling_time - self.new_cycle_eps_tollerance
         ):  # New sample

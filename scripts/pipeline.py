@@ -184,7 +184,6 @@ class PipelineMarsLander(PipelineWithDefaults):
             TODO: implement
             STATUS: in progress
         """
-        # frames = np.arange(100)
         anm = animation.FuncAnimation(
             self.animator.fig_sim,
             self.animator.animate,
@@ -194,29 +193,16 @@ class PipelineMarsLander(PipelineWithDefaults):
             repeat=False,
             # frames=frames,
         )
-        # anm = animation.FuncAnimation(
-        #     self.visualizer.fig_sim,
-        #     self.visualizer.animate,
-        #     init_func=self.visualizer.init_anim,
-        #     blit=False,
-        #     interval=self.sampling_time / 1e6,
-        #     repeat=False,
-        # )
 
         self.animator.get_anm(anm)
-        # self.visualizer.get_anm(anm)
 
         cId = self.animator.fig_sim.canvas.mpl_connect(
             "key_press_event", lambda event: on_key_press(event, anm)
         )
-        # cId = self.visualizer.fig_sim.canvas.mpl_connect(
-        #     "key_press_event", lambda event: on_key_press(event, anm)
-        # )
 
         anm.running = True
 
         self.animator.fig_sim.tight_layout()
-        # self.visualizer.fig_sim.tight_layout()
 
         plt.show()
 
